@@ -4,5 +4,9 @@ global: compile
 local: compile
 	mv branal ${HOME}/.local/bin
 
-compile:
-	gcc main.c -o branal
+compile: utils
+	gcc *.o main.c -o branal
+	rm *.o
+
+utils:
+	gcc -c analyzer/utils/fs.c
