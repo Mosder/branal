@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "analyzer/capture.h"
 #include "analyzer/utils/fs.h"
 
 // prints help
@@ -17,12 +18,6 @@ void print_help() {
 
 // starts live analyzer mode
 void start_live_analyzer() {
-    // TODO: implement
-    printf("Not implemented\n");
-}
-
-// starts the only capturing packets mode
-void start_capturing_packets() {
     // TODO: implement
     printf("Not implemented\n");
 }
@@ -48,7 +43,7 @@ int main(int argc, char *argv[]) {
         start_live_analyzer();
     }
     else if (strcmp("c", argv[1]) == 0 || strcmp("capture", argv[1]) == 0) {
-        start_capturing_packets();
+        capturing_mode(argc >= 3 ? argv[2] : NULL);
     }
     else if (strcmp("h", argv[1]) == 0 || strcmp("help", argv[1]) == 0) {
         print_help();
