@@ -54,11 +54,18 @@ To install it into `/usr/bin`:
 ```
 make
 ```
-that will use sudo and require password.  
+that will use sudo and require password.
+
 You can instead install it into `~/.local/bin`:
 ```
 make local
 ```
+
+You can also just compile it in place:
+```
+make compile
+```
+and just move the `branal` binary to your preferred directory.
 
 ## Usage
 
