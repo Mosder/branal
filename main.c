@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "analyzer/analyzer.h"
 #include "analyzer/capture.h"
 #include "analyzer/utils/fs.h"
 
@@ -18,14 +19,6 @@ void print_help() {
 
 // starts live analyzer mode
 void start_live_analyzer() {
-    // TODO: implement
-    printf("Not implemented\n");
-}
-
-// analyzes the specified file
-// params:
-// 	- file_path - path to the .pcap file to be analyzed
-void analyze_file(char *file_path) {
     // TODO: implement
     printf("Not implemented\n");
 }
