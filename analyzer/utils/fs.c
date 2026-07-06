@@ -1,8 +1,9 @@
-#include "utils.h"
+#include "fs.h"
 
-#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 void get_home_dir(char *home_dir) {
     strcpy(home_dir, getenv("HOME"));
@@ -34,10 +35,4 @@ void create_necessary_directories() {
     mkdir(main_dir, 0755);
     mkdir(capture_dir, 0755);
     mkdir(saves_dir, 0755);
-}
-
-void write_file(char *path, void *contents, int contents_len, int flags, mode_t permissions) {
-    int fd = open(path, flags, permissions);
-    write(fd, contents, contents_len);
-    close(fd);
 }
