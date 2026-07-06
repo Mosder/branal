@@ -4,7 +4,7 @@
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
 
-const unsigned char *get_payload_from_packet(const unsigned char *packet, const struct pcap_pkthdr *packet_data, int *payload_len) {
+const unsigned char *get_payload_from_packet(const unsigned char *packet, const struct pcap_pkthdr *packet_data, int *payload_len, uint32_t *tcp_seq) {
     // get Ethernet header
     const struct ether_header *eth_header = (const struct ether_header *)packet;
     int eth_header_len = sizeof(struct ether_header);
@@ -28,6 +28,9 @@ const unsigned char *get_payload_from_packet(const unsigned char *packet, const 
     // get TCP header
     const struct tcphdr *tcp_header = (const struct tcphdr *)(packet + eth_header_len + ip_header_len);
     int tcp_header_len = tcp_header->th_off * 4;
+
+    // get TCP sequence number
+    *tcp_seq = ntohl(tcp_header->seq);
 
     // get payload
     int total_header_len = eth_header_len + ip_header_len + tcp_header_len;

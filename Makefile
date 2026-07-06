@@ -4,7 +4,7 @@ global: compile
 local: compile
 	mv branal ${HOME}/.local/bin
 
-compile: utils capture analyzer
+compile: utils capture analyzer parser
 	gcc *.o main.c -lpcap -o branal
 	rm *.o
 
@@ -18,5 +18,9 @@ capture:
 
 analyzer:
 	gcc -c analyzer/analyzer.c
+
+parser:
+	gcc -c analyzer/parser/parser.c
+	gcc -c analyzer/parser/fight_results.c
 
 .PHONY: analyzer

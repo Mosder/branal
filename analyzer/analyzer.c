@@ -1,7 +1,6 @@
 #include "analyzer.h"
 
-#include <unistd.h>
-
+#include "parser/parser.h"
 #include "utils/pcap.h"
 
 void analyze_file(char *path) {
@@ -22,14 +21,11 @@ void analyze_file(char *path) {
     // read packets from the file
     while (pcap_next_ex(handle, &packet_data, &packet) == 1) {
         int payload_len;
-        payload = get_payload_from_packet(packet, packet_data, &payload_len);
-        if (payload_len > 0) {
-            printf("\n----------------\n");
-            printf("Payload length: %d\n", payload_len);
-            printf("Payload:\n");
-            fflush(stdout);
-            write(STDOUT_FILENO, payload, payload_len);
-        }
+        uint32_t tcp_seq;
+        payload = get_payload_from_packet(packet, packet_data, &payload_len, &tcp_seq);
+        // TODO: Stream reassembly using TCP sequence number
+        int parsed_len;
+        parse_stream((char *)payload, payload_len, &parsed_len);
     }
 
     pcap_close(handle);
