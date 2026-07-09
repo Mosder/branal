@@ -37,3 +37,21 @@ const unsigned char *get_payload_from_packet(const unsigned char *packet, const 
     *payload_len = packet_data->caplen - total_header_len;
     return packet + total_header_len;
 }
+
+PendingPayload new_pending(const unsigned char *payload, int payload_len) {
+    // TODO: impement
+    PendingPayload tmp;
+    return tmp;
+}
+
+unsigned char *free_parsed_data(unsigned char *stream, uint32_t stream_seq, int stream_len, int parsed_len) {
+    // TODO: impement
+    return NULL;
+}
+
+int add_segment_to_stream(
+    unsigned char *stream, uint32_t stream_seq, int stream_len, const unsigned char *payload, uint32_t payload_seq, int payload_len, HashMap *pending
+) {
+    // TODO: impement
+    return 0;
+}
