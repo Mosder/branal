@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-#define HASHMAP_TABLE_SIZE 1024
+#define HASHMAP_TABLE_SIZE 128
 
 typedef struct HashMapNode {
     void *key;
