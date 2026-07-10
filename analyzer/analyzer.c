@@ -1,7 +1,32 @@
 #include "analyzer.h"
 
 #include "parser/parser.h"
-#include "utils/pcap.h"
+#include "utils/tcp.h"
+
+// loop through packets received from pcap_handle and analyze the TCP stream
+void analyzer_loop(TCPStream *stream, pcap_t *pcap_handle) {
+    // read packets from handle
+    struct pcap_pkthdr *packet_data;
+    const byte_t *packet;
+    while (pcap_next_ex(pcap_handle, &packet_data, &packet) == 1) {
+        // get new segment
+        TCPSegment segment = get_segment_from_packet(packet, packet_data);
+
+        // handle the new segment
+        if (handle_segment(stream, segment)) {
+            // if it was added to the stream - parse it
+            size_t parsed_len;
+            size_t n_parsed_data;
+            ParsedData *parsed_data = parse_stream(stream, &parsed_len, &n_parsed_data);
+
+            // if some bytes were parsed - remove them from the stream
+            if (parsed_len > 0)
+                remove_parsed_data(stream, parsed_len);
+
+            // TODO: handle parsed data
+        }
+    }
+}
 
 void analyze_file(char *path) {
     // open the file
@@ -14,19 +39,9 @@ void analyze_file(char *path) {
         return;
     }
 
-    struct pcap_pkthdr *packet_data;
-    const byte_t *packet;
-    const byte_t *payload;
-
-    // read packets from the file
-    while (pcap_next_ex(handle, &packet_data, &packet) == 1) {
-        int payload_len;
-        uint32_t tcp_seq;
-        payload = get_payload_from_packet(packet, packet_data, &payload_len, &tcp_seq);
-        // TODO: Stream reassembly using TCP sequence number
-        int parsed_len;
-        parse_stream((char *)payload, payload_len, &parsed_len);
-    }
-
+    // analyze the file
+    TCPStream stream = new_stream();
+    analyzer_loop(&stream, handle);
+    destroy_stream(stream);
     pcap_close(handle);
 }

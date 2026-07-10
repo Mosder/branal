@@ -8,10 +8,15 @@ compile: utils capture analyzer parser
 	gcc *.o main.c -lpcap -o branal
 	rm *.o
 
-utils:
+utils: structures
 	gcc -c analyzer/utils/fs.c
 	gcc -c analyzer/utils/time.c
-	gcc -c analyzer/utils/pcap.c
+	gcc -c analyzer/utils/tcp.c
+	gcc -c analyzer/utils/tcp_seq_math.c
+
+structures:
+	gcc -c analyzer/utils/structures/hashmap.c
+	gcc -c analyzer/utils/structures/heap.c
 
 capture:
 	gcc -c analyzer/capture.c

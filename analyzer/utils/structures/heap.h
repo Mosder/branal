@@ -6,6 +6,8 @@
 #define INIT_HEAP_DEPTH 7
 #define INIT_HEAP_CAPACITY (1 << INIT_HEAP_DEPTH) - 1
 
+#ifndef HEAP_DEFINED
+#define HEAP_DEFINED
 typedef struct {
     void **data;
     size_t n_elements;
@@ -14,6 +16,7 @@ typedef struct {
     int (*compare)(void *element1, void *element2);
     void (*element_cleanup)(void *element);
 } Heap;
+#endif
 
 // create a new heap
 // params:

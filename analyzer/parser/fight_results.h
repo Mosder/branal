@@ -1,6 +1,8 @@
 // parser/fight_results.h
 // utilities for parsing the fight results data
 
+#include "../utils/tcp.h"
+
 // Payload structure:
 // FIGHT_RESULTS_START EntityResults (SEPARATOR_ENTITY EntityResults)* FIGHT_RESULTS_END
 //
@@ -87,11 +89,10 @@ typedef struct {
 // find the first fight results data in stream
 // params:
 //      - stream - stream to find the fight results in
-//      - stream_len - length of the stream
 //      - length - length of the fight results data or -1 if there's no end yet
 // returns:
-//      pointer to the beggining of fight results data or NULL if there's none
-extern char *find_fight_results(char *stream, int stream_len, int *length);
+//      pointer to the beginning of fight results data or NULL if there's none
+extern byte_t *find_fight_results(TCPStream *stream, int *length);
 
 // parse given fight results
 // params:
@@ -99,4 +100,4 @@ extern char *find_fight_results(char *stream, int stream_len, int *length);
 //      - length - length of fight results data
 // returns:
 //      FightResults struct containing parsed data
-extern FightResults parse_fight_results(char *data, int length);
+extern FightResults parse_fight_results(byte_t *data, size_t length);
