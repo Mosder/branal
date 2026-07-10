@@ -1,4 +1,4 @@
-// utils/hashmap.h
+// utils/structures/hashmap.h
 // a simple implementation of hashmap using linked list
 
 #include <stddef.h>
