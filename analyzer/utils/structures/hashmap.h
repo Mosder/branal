@@ -72,27 +72,6 @@ extern void *hashmap_get(HashMap *map, void *key);
 //      - key - pointer to the key of the entry to delete
 extern void hashmap_delete(HashMap *map, void *key);
 
-// get first node in the hashmap, use with hashmap_next to iterate over hashmap
-// params:
-//      - map - hash map to get the first node from
-// returns:
-//      pointer to the first node in the hashmap or NULL if there's no entries in it
-extern HashMapNode *hashmap_first(HashMap *map);
-
-// get next node in the hashmap, use with hashmap_first to iterate over hashmap
-// params:
-//      - map - hash map to get the next node from
-//      - node - the node preceeding the one we search for
-// returns:
-//      pointer to the next node in the hashmap or NULL if there's no next
-extern HashMapNode *hashmap_next(HashMap *map, HashMapNode *node);
-
 // free the hash map
 //      - map - hash map to free
 extern void hashmap_free(HashMap *map);
-
-// hash uint32_t key
-extern size_t hash_uint32(void *key);
-
-// compare uint32_t keys
-extern int compare_uint32(void *key1, void *key2);

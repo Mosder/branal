@@ -96,27 +96,6 @@ void hashmap_delete(HashMap *map, void *key) {
     }
 }
 
-HashMapNode *hashmap_first(HashMap *map) {
-    for (size_t i = 0; i < HASHMAP_TABLE_SIZE; i++) {
-        HashMapNode *node = map->table[i];
-        if (node)
-            return node;
-    }
-    return NULL;
-}
-
-HashMapNode *hashmap_next(HashMap *map, HashMapNode *node) {
-    if (node->next)
-        return node->next;
-
-    for (size_t i = map->hash(node->key) + 1; i < HASHMAP_TABLE_SIZE; i++) {
-        HashMapNode *node = map->table[i];
-        if (node)
-            return node;
-    }
-    return NULL;
-}
-
 void hashmap_free(HashMap *map) {
     for (size_t i = 0; i < HASHMAP_TABLE_SIZE; i++) {
         HashMapNode *curr = map->table[i];
@@ -127,21 +106,4 @@ void hashmap_free(HashMap *map) {
         }
     }
     free(map);
-}
-
-size_t hash_uint32(void *key) {
-    // MurmurHash3
-    uint32_t k = *(uint32_t *)key;
-    k ^= k >> 16;
-    k *= 0x85ebca6b;
-    k ^= k >> 13;
-    k *= 0xc2b2ae35;
-    k ^= k >> 16;
-    return k % HASHMAP_TABLE_SIZE;
-}
-
-int compare_uint32(void *key1, void *key2) {
-    uint32_t *k1 = key1;
-    uint32_t *k2 = key2;
-    return *k1 == *k2;
 }
