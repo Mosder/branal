@@ -15,8 +15,8 @@ void analyze_file(char *path) {
     }
 
     struct pcap_pkthdr *packet_data;
-    const unsigned char *packet;
-    const unsigned char *payload;
+    const byte_t *packet;
+    const byte_t *payload;
 
     // read packets from the file
     while (pcap_next_ex(handle, &packet_data, &packet) == 1) {

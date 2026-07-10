@@ -4,7 +4,7 @@
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
 
-const unsigned char *get_payload_from_packet(const unsigned char *packet, const struct pcap_pkthdr *packet_data, int *payload_len, uint32_t *tcp_seq) {
+const byte_t *get_payload_from_packet(const byte_t *packet, const struct pcap_pkthdr *packet_data, int *payload_len, uint32_t *tcp_seq) {
     // get Ethernet header
     const struct ether_header *eth_header = (const struct ether_header *)packet;
     int eth_header_len = sizeof(struct ether_header);
@@ -38,20 +38,17 @@ const unsigned char *get_payload_from_packet(const unsigned char *packet, const 
     return packet + total_header_len;
 }
 
-PendingPayload new_pending(const unsigned char *payload, int payload_len) {
-    // TODO: impement
+PendingPayload new_pending(const byte_t *payload, int payload_len) {
     PendingPayload tmp;
     return tmp;
 }
 
-unsigned char *free_parsed_data(unsigned char *stream, uint32_t stream_seq, int stream_len, int parsed_len) {
+byte_t *free_parsed_data(byte_t *stream, uint32_t stream_seq, int stream_len, int parsed_len) {
     // TODO: impement
     return NULL;
 }
 
-int add_segment_to_stream(
-    unsigned char *stream, uint32_t stream_seq, int stream_len, const unsigned char *payload, uint32_t payload_seq, int payload_len, HashMap *pending
-) {
+int add_segment_to_stream(byte_t *stream, uint32_t stream_seq, int stream_len, const byte_t *payload, uint32_t payload_seq, int payload_len, HashMap *pending) {
     // TODO: impement
     return 0;
 }
