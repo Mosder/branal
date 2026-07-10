@@ -9,8 +9,8 @@ HashMap *hashmap_new(
     void (*value_cleanup)(void *key)
 ) {
     HashMap *map = malloc(sizeof(HashMap));
-    for (size_t i = 0; i < HASHMAP_TABLE_SIZE; i++)
-        map->table[i] = NULL;
+    // initialize NULLs
+    memset(map->table, 0, sizeof(HashMapNode *) * HASHMAP_TABLE_SIZE);
     map->key_size = key_size;
     map->value_size = value_size;
     map->hash = hash;
