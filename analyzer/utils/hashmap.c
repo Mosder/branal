@@ -96,6 +96,27 @@ void hashmap_delete(HashMap *map, void *key) {
     }
 }
 
+HashMapNode *hashmap_first(HashMap *map) {
+    for (size_t i = 0; i < HASHMAP_TABLE_SIZE; i++) {
+        HashMapNode *node = map->table[i];
+        if (node)
+            return node;
+    }
+    return NULL;
+}
+
+HashMapNode *hashmap_next(HashMap *map, HashMapNode *node) {
+    if (node->next)
+        return node->next;
+
+    for (size_t i = map->hash(node->key) + 1; i < HASHMAP_TABLE_SIZE; i++) {
+        HashMapNode *node = map->table[i];
+        if (node)
+            return node;
+    }
+    return NULL;
+}
+
 void hashmap_free(HashMap *map) {
     for (size_t i = 0; i < HASHMAP_TABLE_SIZE; i++) {
         HashMapNode *curr = map->table[i];
