@@ -56,15 +56,15 @@
 }
 #define ENTITY_FIELD_ADDRESSES(entity_results) {\
     &entity_results.team,      \
-    &entity_results.name,       \
+    &entity_results.name,      \
     &entity_results.exp,       \
     &entity_results.field4,    \
     &entity_results.gold,      \
     &entity_results.field6,    \
-    &entity_results.field7,     \
-    &entity_results.gear,       \
+    &entity_results.field7,    \
+    &entity_results.gear,      \
     &entity_results.field9,    \
-    &entity_results.items,      \
+    &entity_results.items,     \
     &entity_results.field11,   \
     &entity_results.field12,   \
     &entity_results.field13,   \
@@ -80,16 +80,16 @@
     &entity_results.field23,   \
     &entity_results.field24,   \
     &entity_results.psycho,    \
-    &entity_results.drifs,      \
+    &entity_results.drifs,     \
     &entity_results.splinters, \
     &entity_results.field28,   \
-    &entity_results.field29,    \
+    &entity_results.field29,   \
     &entity_results.field30,   \
     &entity_results.field31,   \
     &entity_results.field32,   \
     &entity_results.field33,   \
-    &entity_results.field34,    \
-    &entity_results.saturation  \
+    &entity_results.field34,   \
+    &entity_results.saturation \
 }
 
 #ifndef ENTITY_RESULTS_DEFINED
