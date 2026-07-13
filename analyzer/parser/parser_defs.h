@@ -3,6 +3,11 @@
 
 #include "../utils/tcp.h"
 
+#ifndef TYPE_ENUM_DEFINED
+#define TYPE_ENUM_DEFINED
+typedef enum { INT, FLOAT, DOUBLE, STRING } TypeEnum;
+#endif
+
 #ifndef RESULTS_ENUM_DEFINED
 #define RESULTS_ENUM_DEFINED
 typedef enum { TYPE_FIGHT_RESULTS } ResultsEnum;

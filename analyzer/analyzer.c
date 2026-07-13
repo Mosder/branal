@@ -1,6 +1,7 @@
 #include "analyzer.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "parser/parser.h"
 #include "utils/tcp.h"
@@ -35,12 +36,41 @@ void analyzer_loop(TCPStream *stream, pcap_t *pcap_handle, void (*parsed_data_ha
     }
 }
 
+// prints fight resutls
+void print_fight_results(FightResults results) {
+    printf("Enemies:\n\t");
+    for (size_t i = 0; i < results.num_enemy; i++) {
+        EnemyResults enemy = results.enemy_results[i];
+        printf("%s (%d)%s", enemy.name, enemy.level, i < results.num_enemy - 1 ? ", " : "\n");
+    }
+    printf("Player rewards:\n");
+    for (size_t i = 0; i < results.num_friendly; i++) {
+        FriendlyResults friendly = results.friendly_results[i];
+        printf("\t%s (%d):\n", friendly.name, friendly.level);
+        printf("\t\texp: %d\n", friendly.exp);
+        printf("\t\tgold: %d\n", friendly.gold);
+        if (friendly.psycho > 0)
+            printf("\t\tpsycho: %d\n", friendly.psycho);
+        if (strlen(friendly.items) > 0)
+            printf("\t\titems: %s\n", friendly.items);
+        if (strlen(friendly.gear) > 0)
+            printf("\t\tgear: %s\n", friendly.gear);
+        if (strlen(friendly.drifs) > 0)
+            printf("\t\tdrifs: %s\n", friendly.drifs);
+        if (friendly.splinters > 0)
+            printf("\t\tsplinters: %d\n", friendly.splinters);
+        if (friendly.saturation > 0)
+            printf("\t\tsaturation: %d (%s)\n", friendly.saturation, friendly.saturation_type);
+    }
+    printf("\n");
+}
+
 // file analyzer parsed data handler
 void file_parsed_data_handler(ParsedData *parsed_data, size_t n_parsed_data) {
     for (size_t i = 0; i < n_parsed_data; i++) {
         switch (parsed_data[i].data_type) {
             case TYPE_FIGHT_RESULTS:
-                printf("Fight results\n");
+                print_fight_results(*(FightResults *)parsed_data[i].data);
                 break;
         }
     }

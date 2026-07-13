@@ -16,6 +16,82 @@
 #define SEPARATOR_ENTITY "[--]"
 #define SEPARATOR_RESULT "&"
 
+#define ENTITY_FIELD_COUNT 35
+#define ENTITY_FIELD_TYPES { \
+    /* team */       INT,    \
+    /* name */       STRING, \
+    /* exp */        INT,    \
+    /* field4 */     FLOAT,  \
+    /* gold */       INT,    \
+    /* field6 */     FLOAT,  \
+    /* field7 */     STRING, \
+    /* gear */       STRING, \
+    /* field9 */     INT,    \
+    /* items */      STRING, \
+    /* field11 */    INT,    \
+    /* field12 */    INT,    \
+    /* field13 */    FLOAT,  \
+    /* field14 */    FLOAT,  \
+    /* field15 */    FLOAT,  \
+    /* level */      INT,    \
+    /* field17 */    DOUBLE, \
+    /* field18 */    FLOAT,  \
+    /* field19 */    INT,    \
+    /* field20 */    INT,    \
+    /* field21 */    FLOAT,  \
+    /* field22 */    FLOAT,  \
+    /* field23 */    INT,    \
+    /* field24 */    INT,    \
+    /* psycho */     INT,    \
+    /* drifs */      STRING, \
+    /* splinters */  INT,    \
+    /* field28 */    INT,    \
+    /* field29 */    STRING, \
+    /* field30 */    INT,    \
+    /* field31 */    INT,    \
+    /* field32 */    INT,    \
+    /* field33 */    INT,    \
+    /* field34 */    STRING, \
+    /* saturation */ STRING  \
+}
+#define ENTITY_FIELD_ADDRESSES(entity_results) {\
+    &entity_results.team,      \
+    &entity_results.name,       \
+    &entity_results.exp,       \
+    &entity_results.field4,    \
+    &entity_results.gold,      \
+    &entity_results.field6,    \
+    &entity_results.field7,     \
+    &entity_results.gear,       \
+    &entity_results.field9,    \
+    &entity_results.items,      \
+    &entity_results.field11,   \
+    &entity_results.field12,   \
+    &entity_results.field13,   \
+    &entity_results.field14,   \
+    &entity_results.field15,   \
+    &entity_results.level,     \
+    &entity_results.field17,   \
+    &entity_results.field18,   \
+    &entity_results.field19,   \
+    &entity_results.field20,   \
+    &entity_results.field21,   \
+    &entity_results.field22,   \
+    &entity_results.field23,   \
+    &entity_results.field24,   \
+    &entity_results.psycho,    \
+    &entity_results.drifs,      \
+    &entity_results.splinters, \
+    &entity_results.field28,   \
+    &entity_results.field29,    \
+    &entity_results.field30,   \
+    &entity_results.field31,   \
+    &entity_results.field32,   \
+    &entity_results.field33,   \
+    &entity_results.field34,    \
+    &entity_results.saturation  \
+}
+
 #ifndef ENTITY_RESULTS_DEFINED
 #define ENTITY_RESULTS_DEFINED
 typedef struct {
