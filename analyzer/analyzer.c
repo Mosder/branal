@@ -1,10 +1,12 @@
 #include "analyzer.h"
 
+#include <stdlib.h>
+
 #include "parser/parser.h"
 #include "utils/tcp.h"
 
 // loop through packets received from pcap_handle and analyze the TCP stream
-void analyzer_loop(TCPStream *stream, pcap_t *pcap_handle) {
+void analyzer_loop(TCPStream *stream, pcap_t *pcap_handle, void (*parsed_data_handler)(ParsedData *parsed_data, size_t n_parsed_data)) {
     // read packets from handle
     struct pcap_pkthdr *packet_data;
     const byte_t *packet;
@@ -23,7 +25,23 @@ void analyzer_loop(TCPStream *stream, pcap_t *pcap_handle) {
             if (parsed_len > 0)
                 remove_parsed_data(stream, parsed_len);
 
-            // TODO: handle parsed data
+            // if there's parsed data - call the parsed data handler
+            if (n_parsed_data > 0)
+                parsed_data_handler(parsed_data, n_parsed_data);
+
+            // free the entire parsed data memory
+            free_parsed_data(parsed_data, n_parsed_data);
+        }
+    }
+}
+
+// file analyzer parsed data handler
+void file_parsed_data_handler(ParsedData *parsed_data, size_t n_parsed_data) {
+    for (size_t i = 0; i < n_parsed_data; i++) {
+        switch (parsed_data[i].data_type) {
+            case TYPE_FIGHT_RESULTS:
+                printf("Fight results\n");
+                break;
         }
     }
 }
@@ -41,7 +59,7 @@ void analyze_file(char *path) {
 
     // analyze the file
     TCPStream stream = new_stream();
-    analyzer_loop(&stream, handle);
+    analyzer_loop(&stream, handle, file_parsed_data_handler);
     destroy_stream(stream);
     pcap_close(handle);
 }

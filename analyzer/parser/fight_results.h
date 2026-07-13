@@ -2,6 +2,7 @@
 // utilities for parsing the fight results data
 
 #include "../utils/tcp.h"
+#include "parser_defs.h"
 
 // Payload structure:
 // FIGHT_RESULTS_START EntityResults (SEPARATOR_ENTITY EntityResults)* FIGHT_RESULTS_END
@@ -15,6 +16,8 @@
 #define SEPARATOR_ENTITY "[--]"
 #define SEPARATOR_RESULT "&"
 
+#ifndef ENTITY_RESULTS_DEFINED
+#define ENTITY_RESULTS_DEFINED
 typedef struct {
     int team; // friend or enemy
     char *name;
@@ -52,12 +55,15 @@ typedef struct {
     char *field34;
     char *saturation;
 } EntityResults;
+#endif
 
 // values of field "team"
 #define TEAM_FRIEND 1
 #define TEAM_ENEMY 2
 
 // fight results data for friendly
+#ifndef FRIENDLY_RESULTS_DEFINED
+#define FRIENDLY_RESULTS_DEFINED
 typedef struct {
     char *name;
     int exp;
@@ -71,33 +77,29 @@ typedef struct {
     char *saturation_type;
     int saturation;
 } FriendlyResults;
+#endif
 
 // fight results data for enemy
+#ifndef ENEMY_RESULTS_DEFINED
+#define ENEMY_RESULTS_DEFINED
 typedef struct {
     char *name;
     int level;
 } EnemyResults;
+#endif
+
+#define MAX_ENTITIES_PER_SIDE 8
 
 // entire fight resutls
+#ifndef FIGHT_RESULTS_DEFINED
+#define FIGHT_RESULTS_DEFINED
 typedef struct {
-    int num_friendly;
-    FriendlyResults *friendly_results;
-    int num_enemy;
-    EnemyResults *enemy_results;
+    size_t num_friendly;
+    FriendlyResults friendly_results[MAX_ENTITIES_PER_SIDE];
+    size_t num_enemy;
+    EnemyResults enemy_results[MAX_ENTITIES_PER_SIDE];
 } FightResults;
+#endif
 
-// find the first fight results data in stream
-// params:
-//      - stream - stream to find the fight results in
-//      - length - length of the fight results data or -1 if there's no end yet
-// returns:
-//      pointer to the beginning of fight results data or NULL if there's none
-extern byte_t *find_fight_results(TCPStream *stream, int *length);
-
-// parse given fight results
-// params:
-//      - data - fight results data to parse
-//      - length - length of fight results data
-// returns:
-//      FightResults struct containing parsed data
-extern FightResults parse_fight_results(byte_t *data, size_t length);
+extern find_function_t find_fight_results;
+extern parse_function_t parse_fight_results;

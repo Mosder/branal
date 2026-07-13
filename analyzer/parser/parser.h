@@ -1,17 +1,11 @@
 // parser/parser.h
 // main parser file
 
-#include "fight_results.h"
-
 #include "../utils/tcp.h"
+#include "fight_results.h"
+#include "parser_defs.h"
 
-// "generic" type for parsed data
-typedef struct {
-    enum { FIGHT_RESULTS } data_type;
-    union {
-        FightResults fight_results;
-    } data;
-} ParsedData;
+#define INIT_PARSED_DATA_CAPACITY 4
 
 // parse a stream of TCP data
 // params:
@@ -21,3 +15,9 @@ typedef struct {
 // returns:
 //      pointer to the array of parsed data
 extern ParsedData *parse_stream(TCPStream *stream, size_t *parsed_len, size_t *n_parsed_data);
+
+// free the entire parsed data array from parse_stream function
+// params:
+//      - parsed_data - parsed data to free
+//      - n_parsed_data - count of parsed data
+extern void free_parsed_data(ParsedData *parsed_data, size_t n_parsed_data);
