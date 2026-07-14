@@ -101,6 +101,8 @@ void heap_top_remove(Heap *heap) {
 }
 
 void heap_free(Heap *heap) {
+    if (!heap)
+        return;
     for (size_t i = 0; i < heap->n_elements; i++) {
         free_heap_element(heap, i);
     }

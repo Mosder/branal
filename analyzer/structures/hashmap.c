@@ -100,6 +100,8 @@ void hashmap_delete(HashMap *map, void *key) {
 }
 
 void hashmap_free(HashMap *map) {
+    if (!map)
+        return;
     for (size_t i = 0; i < HASHMAP_TABLE_SIZE; i++) {
         HashMapNode *curr = map->table[i];
         while (curr) {
