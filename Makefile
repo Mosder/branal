@@ -12,7 +12,7 @@ compile: csv structures utils parser capture analyzer
 	rm *.o
 
 csv:
-	gcc csv_to_headers.c -o csv_to_headers
+	$(CC) csv_to_headers.c -o csv_to_headers
 	./csv_to_headers
 	rm csv_to_headers
 

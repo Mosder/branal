@@ -6,7 +6,7 @@
 #define EXT ".csv"
 #define EXT_LEN strlen(".csv")
 #define CSV_PATH "csv"
-#define HEADER_PATH "analyzer/csv"
+#define HEADER_PATH "analyzer/" CSV_PATH
 
 #define BUFFER_SIZE 256
 #define MAX_ARR_SIZE 4096
