@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-iquote ./analyzer -O2 -flto -s
+CFLAGS=-Wall -iquote ./analyzer -O2 -flto -s
 
 global: compile
 	sudo mv branal /usr/bin
