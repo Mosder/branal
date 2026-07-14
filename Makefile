@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-iquote ./analyzer
+CFLAGS=-iquote ./analyzer -O2 -flto -s
 
 global: compile
 	sudo mv branal /usr/bin
@@ -7,7 +7,7 @@ global: compile
 local: compile
 	mv branal ${HOME}/.local/bin
 
-compile: structures utils capture analyzer parser
+compile: structures utils parser capture analyzer
 	$(CC) $(CFLAGS) -lpcap *.o main.c -o branal
 	rm *.o
 
@@ -21,14 +21,14 @@ utils:
 	$(CC) $(CFLAGS) -c analyzer/utils/tcp.c
 	$(CC) $(CFLAGS) -c analyzer/utils/tcp_seq_math.c
 
+parser:
+	$(CC) $(CFLAGS) -c analyzer/parser/parser.c
+	$(CC) $(CFLAGS) -c analyzer/parser/fight_results.c
+
 capture:
 	$(CC) $(CFLAGS) -c analyzer/capture.c
 
 analyzer:
 	$(CC) $(CFLAGS) -c analyzer/analyzer.c
-
-parser:
-	$(CC) $(CFLAGS) -c analyzer/parser/parser.c
-	$(CC) $(CFLAGS) -c analyzer/parser/fight_results.c
 
 .PHONY: analyzer
