@@ -7,9 +7,14 @@ global: compile
 local: compile
 	mv branal ${HOME}/.local/bin
 
-compile: structures utils parser capture analyzer
+compile: csv structures utils parser capture analyzer
 	$(CC) $(CFLAGS) -lpcap *.o main.c -o branal
 	rm *.o
+
+csv:
+	gcc csv_to_headers.c -o csv_to_headers
+	./csv_to_headers
+	rm csv_to_headers
 
 structures:
 	$(CC) $(CFLAGS) -c analyzer/structures/hashmap.c
@@ -32,3 +37,4 @@ analyzer:
 	$(CC) $(CFLAGS) -c analyzer/analyzer.c
 
 .PHONY: analyzer
+.PHONY: csv

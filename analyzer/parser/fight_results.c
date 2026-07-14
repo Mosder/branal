@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "csv/id_to_item_name.h"
+#include "csv/id_to_saturation_type.h"
+
 // function to cleanup fight results to be used in ParsedData struct
 void cleanup_fight_results(void *data) {
     FightResults *fight_results = data;
@@ -79,6 +82,14 @@ EntityResults get_entity_results(byte_t *data, size_t length) {
     return results;
 }
 
+char *get_item_name(int item_id) {
+    return item_id < id_to_item_name_len ? id_to_item_name[item_id] : "item_id out of bounds";
+}
+
+char *get_saturation_type(int saturation_id) {
+    return saturation_id < id_to_saturation_type_len ? id_to_saturation_type[saturation_id] : "saturation_id out of bounds";
+}
+
 // parse EntityResults to FriendlyResults
 FriendlyResults parse_to_friendly(EntityResults entity_results) {
     FriendlyResults results;
@@ -100,8 +111,7 @@ FriendlyResults parse_to_friendly(EntityResults entity_results) {
     if (strlen(entity_results.saturation) > 0) {
         int saturation_id;
         sscanf(entity_results.saturation, "%d,%d", &saturation_id, &results.saturation);
-        // TODO: determine type
-        results.saturation_type = "typ";
+        results.saturation_type = get_saturation_type(saturation_id);
     }
 
     return results;
