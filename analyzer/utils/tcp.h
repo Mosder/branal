@@ -12,9 +12,10 @@ typedef unsigned char byte_t;
 #ifndef TCP_SEGMENT_DEFINED
 #define TCP_SEGMENT_DEFINED
 typedef struct {
-    byte_t *payload;
-    size_t len;
-    uint32_t seq;
+    byte_t *payload; // payload in the segment
+    size_t len;      // length of the payload
+    uint32_t seq;    // TCP sequence number of the segment
+    uint16_t port;   // destination (client) port of connection the segment was received from
 } TCPSegment;
 #endif
 
@@ -23,7 +24,7 @@ typedef struct {
 //      - packet - captured packet
 //      - packet_data - metadata about packet
 // returns:
-//      TCPSegment from packet, payload is NULL and len is -1 if the received packet was incorrect
+//      TCPSegment from packet, payload is NULL if the received packet was incorrect
 extern TCPSegment get_segment_from_packet(const byte_t *packet, const struct pcap_pkthdr *packet_data);
 
 // struct that stores all the information about stream
@@ -34,6 +35,7 @@ typedef struct {
     size_t len;      // length of the stream
     size_t capacity; // capacity of the data buffer
     uint32_t seq;    // TCP sequence number of the first byte in the stream
+    uint16_t port;   // destination (client) port of current analyzed connection
     Heap *pending;   // min heap of segments yet to be added to stream (sorted by TCP sequence number)
 } TCPStream;
 #endif

@@ -12,8 +12,9 @@
 TCPSegment new_segment() {
     TCPSegment segment;
     segment.payload = NULL;
-    segment.len = -1;
+    segment.len = 0;
     segment.seq = 0;
+    segment.port = 0;
     return segment;
 }
 
@@ -53,8 +54,9 @@ TCPSegment get_segment_from_packet(const byte_t *packet, const struct pcap_pkthd
     const struct tcphdr *tcp_header = (const struct tcphdr *)(packet + eth_header_len + ip_header_len);
     int tcp_header_len = tcp_header->th_off * 4;
 
-    // get TCP sequence number
+    // get TCP sequence number and destination port
     segment.seq = ntohl(tcp_header->seq);
+    segment.port = ntohs(tcp_header->th_dport);
 
     // get payload
     int total_header_len = eth_header_len + ip_header_len + tcp_header_len;
@@ -66,11 +68,12 @@ TCPSegment get_segment_from_packet(const byte_t *packet, const struct pcap_pkthd
 
 TCPStream new_stream() {
     TCPStream stream;
-    stream.data = NULL; // NULL to differentiate between first and other segments
+    stream.data = malloc(INIT_STREAM_CAPACITY);
     stream.len = 0;
     stream.capacity = INIT_STREAM_CAPACITY;
     stream.seq = 0;
-    stream.pending = heap_new(sizeof(TCPSegment), segments_compare, segment_cleanup);
+    stream.port = 0;
+    stream.pending = NULL;
     return stream;
 }
 
@@ -142,10 +145,16 @@ void add_pending_segments(TCPStream *stream) {
 }
 
 int handle_segment(TCPStream *stream, TCPSegment segment) {
-    // add the segment if it's the first one
-    if (stream->data == NULL) {
-        stream->data = malloc(stream->capacity);
+    // add the segment if port is different (new connection)
+    if (stream->port != segment.port) {
+        // create new heap for new pending segments
+        heap_free(stream->pending);
+        stream->pending = heap_new(sizeof(TCPSegment), segments_compare, segment_cleanup);
+
+        stream->len = 0;
         stream->seq = segment.seq;
+        stream->port = segment.port;
+
         add_segment(stream, segment, 0);
         free(segment.payload);
         return 1;

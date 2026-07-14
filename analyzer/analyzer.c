@@ -15,8 +15,8 @@ void analyzer_loop(TCPStream *stream, pcap_t *pcap_handle, void (*parsed_data_ha
         // get new segment
         TCPSegment segment = get_segment_from_packet(packet, packet_data);
 
-        // handle the new segment
-        if (handle_segment(stream, segment)) {
+        // handle the new segment if it's correct one and has data in it (ignore SYN)
+        if (segment.len > 0 && handle_segment(stream, segment)) {
             // if it was added to the stream - parse it
             size_t parsed_len;
             size_t n_parsed_data;
