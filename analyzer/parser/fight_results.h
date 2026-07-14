@@ -125,7 +125,7 @@ typedef struct {
     int field28;
     char *field29;
     int field30;
-    int field31; // possibly information who is the player - 1 for current player, 0 for others (need to double check)
+    int field31;
     int field32;
     int field33;
     char *field34;
