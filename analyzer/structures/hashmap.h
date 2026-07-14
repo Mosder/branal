@@ -1,4 +1,4 @@
-// utils/structures/hashmap.h
+// structures/hashmap.h
 // a simple implementation of hashmap using linked list
 
 #include <stddef.h>
@@ -47,7 +47,11 @@ typedef struct {
 // returns:
 //      pointer to the new hash map
 extern HashMap *hashmap_new(
-    size_t key_size, size_t value_size, size_t (*hash)(void *key), int (*compare)(void *key1, void *key2), void (*key_cleanup)(void *key),
+    size_t key_size,
+    size_t value_size,
+    size_t (*hash)(void *key),
+    int (*compare)(void *key1, void *key2),
+    void (*key_cleanup)(void *key),
     void (*value_cleanup)(void *value)
 );
 

@@ -1,8 +1,8 @@
-#include "parser.h"
+#include "parser/parser.h"
 
 #include <stdlib.h>
 
-#include "find_parse_functions.h"
+#include "parser/find_parse_functions.h"
 
 // expand parsed data exponentially to fit el_count elements
 ParsedData *expand_parsed_data(ParsedData *parsed_data, size_t *capacity, size_t el_count) {

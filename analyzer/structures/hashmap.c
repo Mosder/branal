@@ -1,10 +1,14 @@
-#include "hashmap.h"
+#include "structures/hashmap.h"
 
 #include <stdlib.h>
 #include <string.h>
 
 HashMap *hashmap_new(
-    size_t key_size, size_t value_size, size_t (*hash)(void *key), int (*compare)(void *key1, void *key2), void (*key_cleanup)(void *key),
+    size_t key_size,
+    size_t value_size,
+    size_t (*hash)(void *key),
+    int (*compare)(void *key1, void *key2),
+    void (*key_cleanup)(void *key),
     void (*value_cleanup)(void *key)
 ) {
     HashMap *map = malloc(sizeof(HashMap));

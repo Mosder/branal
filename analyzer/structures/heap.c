@@ -1,4 +1,4 @@
-#include "heap.h"
+#include "structures/heap.h"
 
 #include <stdlib.h>
 #include <string.h>

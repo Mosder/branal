@@ -1,4 +1,4 @@
-// utils/structures/heap.h
+// structures/heap.h
 // a simple implementation of heap
 
 #include <stddef.h>

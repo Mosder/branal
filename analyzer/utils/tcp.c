@@ -1,4 +1,4 @@
-#include "tcp.h"
+#include "utils/tcp.h"
 
 #include <netinet/if_ether.h>
 #include <netinet/ip.h>
@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "tcp_seq_math.h"
+#include "utils/tcp_seq_math.h"
 
 // initalize default TCP segment
 TCPSegment new_segment() {

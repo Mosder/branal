@@ -1,4 +1,4 @@
-#include "fight_results.h"
+#include "parser/fight_results.h"
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,8 +1,8 @@
 // parser/fight_results.h
 // utilities for parsing the fight results data
 
-#include "../utils/tcp.h"
-#include "parser_defs.h"
+#include "parser/parser_defs.h"
+#include "utils/tcp.h"
 
 // Payload structure:
 // FIGHT_RESULTS_START EntityResults (SEPARATOR_ENTITY EntityResults)* FIGHT_RESULTS_END

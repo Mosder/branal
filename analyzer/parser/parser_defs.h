@@ -1,7 +1,7 @@
 // parser/parser_defs.h
 // useful definitions for parser files
 
-#include "../utils/tcp.h"
+#include "utils/tcp.h"
 
 #ifndef TYPE_ENUM_DEFINED
 #define TYPE_ENUM_DEFINED

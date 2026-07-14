@@ -1,9 +1,9 @@
 // parser/parser.h
 // main parser file
 
-#include "../utils/tcp.h"
-#include "fight_results.h"
-#include "parser_defs.h"
+#include "parser/fight_results.h"
+#include "parser/parser_defs.h"
+#include "utils/tcp.h"
 
 #define INIT_PARSED_DATA_CAPACITY 4
 

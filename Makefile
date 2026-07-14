@@ -1,31 +1,34 @@
+CC=gcc
+CFLAGS=-iquote ./analyzer
+
 global: compile
 	sudo mv branal /usr/bin
 
 local: compile
 	mv branal ${HOME}/.local/bin
 
-compile: utils capture analyzer parser
-	gcc *.o main.c -lpcap -o branal
+compile: structures utils capture analyzer parser
+	$(CC) $(CFLAGS) -lpcap *.o main.c -o branal
 	rm *.o
 
-utils: structures
-	gcc -c analyzer/utils/fs.c
-	gcc -c analyzer/utils/time.c
-	gcc -c analyzer/utils/tcp.c
-	gcc -c analyzer/utils/tcp_seq_math.c
-
 structures:
-	gcc -c analyzer/utils/structures/hashmap.c
-	gcc -c analyzer/utils/structures/heap.c
+	$(CC) $(CFLAGS) -c analyzer/structures/hashmap.c
+	$(CC) $(CFLAGS) -c analyzer/structures/heap.c
+
+utils:
+	$(CC) $(CFLAGS) -c analyzer/utils/fs.c
+	$(CC) $(CFLAGS) -c analyzer/utils/time.c
+	$(CC) $(CFLAGS) -c analyzer/utils/tcp.c
+	$(CC) $(CFLAGS) -c analyzer/utils/tcp_seq_math.c
 
 capture:
-	gcc -c analyzer/capture.c
+	$(CC) $(CFLAGS) -c analyzer/capture.c
 
 analyzer:
-	gcc -c analyzer/analyzer.c
+	$(CC) $(CFLAGS) -c analyzer/analyzer.c
 
 parser:
-	gcc -c analyzer/parser/parser.c
-	gcc -c analyzer/parser/fight_results.c
+	$(CC) $(CFLAGS) -c analyzer/parser/parser.c
+	$(CC) $(CFLAGS) -c analyzer/parser/fight_results.c
 
 .PHONY: analyzer

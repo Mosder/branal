@@ -1,4 +1,4 @@
-#include "tcp_seq_math.h"
+#include "utils/tcp_seq_math.h"
 
 int seq_after(uint32_t a, uint32_t b) {
     return (int32_t)(a - b) > 0;
