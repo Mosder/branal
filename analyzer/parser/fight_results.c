@@ -148,7 +148,7 @@ ParsedData parse_fight_results(byte_t *data, size_t length) {
         // depending on team - parse it into friendly or enemy results
         switch (entity_results.team) {
             case TEAM_FRIEND:
-                results->friendly_results[(results->num_friendly)++] = parse_to_friendly(entity_results);
+                results->friendly_results[results->num_friendly++] = parse_to_friendly(entity_results);
                 break;
             case TEAM_ENEMY:
                 results->enemy_results[results->num_enemy++] = parse_to_enemy(entity_results);
