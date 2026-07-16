@@ -83,11 +83,11 @@ EntityResults get_entity_results(byte_t *data, size_t length) {
 }
 
 char *get_item_name(int item_id) {
-    return item_id < id_to_item_name_len ? id_to_item_name[item_id] : "item_id out of bounds";
+    return item_id < id_to_item_name_len ? id_to_item_name[item_id] : "null";
 }
 
 char *get_saturation_type(int saturation_id) {
-    return saturation_id < id_to_saturation_type_len ? id_to_saturation_type[saturation_id] : "saturation_id out of bounds";
+    return saturation_id < id_to_saturation_type_len ? id_to_saturation_type[saturation_id] : "null";
 }
 
 // parse EntityResults to FriendlyResults

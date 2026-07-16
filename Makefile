@@ -7,7 +7,7 @@ global: compile
 local: compile
 	mv branal ${HOME}/.local/bin
 
-compile: csv structures utils parser capture analyzer
+compile: csv structures utils parser capture analyzer render
 	$(CC) $(CFLAGS) -lpcap *.o main.c -o branal
 	rm *.o
 
@@ -35,6 +35,9 @@ capture:
 
 analyzer:
 	$(CC) $(CFLAGS) -c analyzer/analyzer.c
+
+render:
+	$(CC) $(CFLAGS) -c analyzer/render.c
 
 .PHONY: analyzer
 .PHONY: csv
