@@ -133,6 +133,11 @@ typedef struct {
 } EntityResults;
 #endif
 
+// items/gear/drifs fields parsing info
+#define INIT_ITEMS_CAPACITY 8
+#define SINGLE_ITEM_BUFFER_LEN 128
+#define SEPARATOR_ITEMS "[-]"
+
 // values of field "team"
 #define TEAM_FRIEND 1
 #define TEAM_ENEMY 2
@@ -144,11 +149,10 @@ typedef struct {
     char *name;
     int exp;
     int gold;
-    char *gear;
-    char *items;
+    char **items;
+    size_t num_items;
     int level;
     int psycho;
-    char *drifs;
     int splinters;
     char *saturation_type;
     int saturation;

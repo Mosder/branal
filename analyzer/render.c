@@ -108,18 +108,23 @@ void print_player_rewards(FriendlyResults results) {
     }
     printf("\n");
 
-    // TODO: change this when I parse the items etc. to a readable format
-    // needs to utilize utf8_strlen, because right now utf8 characters mess the table up
-    char big_buf[1024];
-    sprintf(big_buf, "%s - %s - %s", results.items, results.gear, results.drifs);
-    if (strlen(big_buf) > 6) {
+    if (results.num_items > 0) {
         printf(TABLE_LINE_START);
         print_center("ITEMS", COLOR_WHITE, TABLE_ITEMS_WIDTH, ' ');
-        printf(TABLE_LINE_END "\n");
+        printf(TABLE_LINE_END "\n" TABLE_LINE_START);
 
-        for (size_t i = 0; i < strlen(big_buf); i += TABLE_ITEMS_WIDTH) {
-            printf(TABLE_LINE_START "%-*.*s" TABLE_LINE_END "\n", (int)TABLE_ITEMS_WIDTH, (int)TABLE_ITEMS_WIDTH, big_buf + i);
+        size_t line_len = 0;
+        for (size_t i = 0; i < results.num_items; i++) {
+            char *sep = i < results.num_items - 1 ? ", " : "";
+            size_t item_len = utf8_strlen(results.items[i]) + strlen(sep);
+            if (line_len + item_len > TABLE_ITEMS_WIDTH) {
+                printf("%*s" TABLE_LINE_END "\n" TABLE_LINE_START, (int)(TABLE_ITEMS_WIDTH - line_len), "");
+                line_len = 0;
+            }
+            printf("%s%s", results.items[i], sep);
+            line_len += item_len;
         }
+        printf("%*s" TABLE_LINE_END "\n", (int)(TABLE_ITEMS_WIDTH - line_len), "");
     }
 }
 
