@@ -7,6 +7,9 @@ global: compile
 local: compile
 	mv branal ${HOME}/.local/bin
 
+debug: CFLAGS=-iquote ./analyzer -Og -g
+debug: global
+
 compile: csv structures utils parser capture analyzer render
 	$(CC) $(CFLAGS) -lpcap *.o main.c -o branal
 	rm *.o
