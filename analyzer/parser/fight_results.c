@@ -14,7 +14,7 @@ void cleanup_fight_results(void *data) {
         FriendlyResults friendly = fight_results->friendly_results[i];
         free(friendly.name);
         for (size_t j = 0; j < friendly.num_items; j++)
-            free(friendly.items[j]);
+            free(friendly.items[j].data);
         free(friendly.items);
     }
     for (size_t i = 0; i < fight_results->num_enemy; i++) {
@@ -27,6 +27,47 @@ byte_t *find_fight_results(TCPStream *stream, int offset, int *length) {
     byte_t *end = memmem(stream->data + offset, stream->len, FIGHT_RESULTS_END, strlen(FIGHT_RESULTS_END));
     *length = start != NULL && end != NULL ? end - start + strlen(FIGHT_RESULTS_END) : -1;
     return start;
+}
+
+// save to a field in struct depending on the type
+void save_to_struct(TypeEnum type, void *field, char *src, size_t src_len) {
+    char *str = malloc(src_len + 1);
+    memcpy(str, src, src_len);
+    str[src_len] = '\0';
+
+    // parse depending on variable type
+    switch (type) {
+        case INT:
+            sscanf(str, "%d", (int *)field);
+            free(str);
+            break;
+        case FLOAT:
+            sscanf(str, "%f", (float *)field);
+            free(str);
+            break;
+        case DOUBLE:
+            sscanf(str, "%lf", (double *)field);
+            free(str);
+            break;
+        case STRING:
+            *(char **)field = str;
+            break;
+    }
+}
+
+// fill struct fields from given data of given length
+void get_struct_data(size_t field_count, TypeEnum *field_types, void **field_pointers, char *data_separator, char *data, size_t data_len) {
+    for (size_t i = 0; i < field_count; i++) {
+        char *sep = memmem(data, data_len, data_separator, strlen(data_separator));
+        size_t len = sep ? sep - data : data_len;
+        save_to_struct(field_types[i], field_pointers[i], (char *)data, len);
+
+        // update data pointer and length
+        if (sep) {
+            data_len -= sep - data + strlen(SEPARATOR_RESULT);
+            data = sep + strlen(SEPARATOR_RESULT);
+        }
+    }
 }
 
 void destroy_entity_results(EntityResults results) {
@@ -45,52 +86,14 @@ EntityResults get_entity_results(byte_t *data, size_t length) {
     EntityResults results;
     TypeEnum field_types[ENTITY_FIELD_COUNT] = ENTITY_FIELD_TYPES;
     void *field_pointers[ENTITY_FIELD_COUNT] = ENTITY_FIELD_ADDRESSES(results);
-
-    for (size_t i = 0; i < ENTITY_FIELD_COUNT; i++) {
-        // get string buffer of given result
-        byte_t *result_separator = memmem(data, length, SEPARATOR_RESULT, strlen(SEPARATOR_RESULT));
-        size_t len = result_separator ? result_separator - data : length;
-        char *str = malloc(len + 1);
-        memcpy(str, data, len);
-        str[len] = '\0';
-
-        // parse depending on variable type
-        switch (field_types[i]) {
-            case INT:
-                sscanf(str, "%d", (int *)field_pointers[i]);
-                free(str);
-                break;
-            case FLOAT:
-                sscanf(str, "%f", (float *)field_pointers[i]);
-                free(str);
-                break;
-            case DOUBLE:
-                sscanf(str, "%lf", (double *)field_pointers[i]);
-                free(str);
-                break;
-            case STRING:
-                *(char **)field_pointers[i] = str;
-                break;
-        }
-
-        // update data pointer and length
-        if (result_separator) {
-            length -= result_separator - data + strlen(SEPARATOR_RESULT);
-            data = result_separator + strlen(SEPARATOR_RESULT);
-        }
-    }
-
+    get_struct_data(ENTITY_FIELD_COUNT, field_types, field_pointers, SEPARATOR_RESULT, (char *)data, length);
     return results;
 }
 
-char *get_item_name(int item_id) {
-    return item_id < id_to_item_name_len ? id_to_item_name[item_id] : "null";
-}
-
-char **expand_items(char **items, size_t *items_capacity, size_t to_fit) {
+Item *expand_items(Item *items, size_t *items_capacity, size_t to_fit) {
     while (*items_capacity < to_fit)
         *items_capacity <<= 1;
-    return realloc(items, *items_capacity * sizeof(char *));
+    return realloc(items, *items_capacity * sizeof(Item));
 }
 
 void add_gear(FriendlyResults *results, size_t *items_capacity, char *gear_str) {
@@ -101,18 +104,58 @@ void add_gear(FriendlyResults *results, size_t *items_capacity, char *gear_str) 
     if (results->num_items >= *items_capacity)
         results->items = expand_items(results->items, items_capacity, results->num_items + 1);
 
-    results->items[results->num_items++] = strdup(gear_str);
+    Item item;
+    item.data = strdup(gear_str);
+    item.type = RARE;
+    results->items[results->num_items++] = item;
+}
+
+void destroy_drif(Drif drif) {
+    free(drif.field1);
+    free(drif.field4);
+    free(drif.field11);
+    free(drif.field12);
+    free(drif.name);
+    free(drif.field18);
+    free(drif.field19);
+}
+
+Drif get_drif(char *data, size_t length) {
+    Drif drif;
+    TypeEnum field_types[DRIF_FIELD_COUNT] = DRIF_FIELD_TYPES;
+    void *field_pointers[DRIF_FIELD_COUNT] = DRIF_FIELD_ADDRESSES(drif);
+    get_struct_data(DRIF_FIELD_COUNT, field_types, field_pointers, SEPARATOR_DRIF_INFO, data, length);
+    return drif;
 }
 
 void add_drifs(FriendlyResults *results, size_t *items_capacity, char *drifs_str) {
     if (strlen(drifs_str) == 0)
         return;
 
-    // TODO: parse
-    if (results->num_items >= *items_capacity)
-        results->items = expand_items(results->items, items_capacity, results->num_items + 1);
+    char *drifs_separator;
+    do {
+        drifs_separator = strstr(drifs_str, SEPARATOR_DRIFS);
+        Drif drif = get_drif(drifs_str, drifs_separator ? drifs_separator - drifs_str : strlen(drifs_str));
 
-    results->items[results->num_items++] = strdup(drifs_str);
+        // if there are still drifs - modify drifs_str pointer
+        if (drifs_separator)
+            drifs_str = drifs_separator + strlen(SEPARATOR_DRIFS);
+
+        // expand if needed
+        if (results->num_items >= *items_capacity)
+            results->items = expand_items(results->items, items_capacity, results->num_items + 1);
+
+        Item item;
+        item.data = strdup(drif.name);
+        item.type = DRIF;
+        results->items[results->num_items++] = item;
+
+        destroy_drif(drif);
+    } while (drifs_separator);
+}
+
+char *get_item_name(int item_id) {
+    return item_id < id_to_item_name_len ? id_to_item_name[item_id] : "null";
 }
 
 void add_items(FriendlyResults *results, size_t *items_capacity, char *items_str) {
@@ -136,7 +179,10 @@ void add_items(FriendlyResults *results, size_t *items_capacity, char *items_str
         if (results->num_items >= *items_capacity)
             results->items = expand_items(results->items, items_capacity, results->num_items + 1);
 
-        results->items[results->num_items++] = strdup(buffer);
+        Item item;
+        item.data = strdup(buffer);
+        item.type = NORMAL;
+        results->items[results->num_items++] = item;
     } while (items_separator);
 }
 
@@ -157,7 +203,7 @@ FriendlyResults parse_to_friendly(EntityResults entity_results) {
 
     // create items array and add to it gear, drifs and items
     results.num_items = 0;
-    results.items = malloc(INIT_ITEMS_CAPACITY * sizeof(char *));
+    results.items = malloc(INIT_ITEMS_CAPACITY * sizeof(Item));
     size_t items_cap = INIT_ITEMS_CAPACITY;
     add_gear(&results, &items_cap, entity_results.gear);
     add_drifs(&results, &items_cap, entity_results.drifs);

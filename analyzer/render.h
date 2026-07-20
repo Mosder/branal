@@ -6,10 +6,11 @@
 // ANSI escape sequence colors
 #define COLOR_RED 91
 #define COLOR_GREEN 92
-#define COLOR_WHITE 97
 #define COLOR_YELLOW 93
-#define COLOR_AQUA 96
 #define COLOR_BLUE 94
+#define COLOR_PURPLE 95
+#define COLOR_AQUA 96
+#define COLOR_WHITE 97
 
 #define TABLE_ROW_SEPARATOR_CHAR '-'
 
@@ -29,6 +30,7 @@
 #define TABLE_SATURATION_WIDTH 13
 #define TABLE_SPLINTERS_WIDTH 9
 
+// clang-format off
 #define TABLE_COLUMN_NAMES {"Nick (LVL)", "EXP", "Gold", "Psycho", "Saturation", "Splinters"}
 #define TABLE_COLUMN_COLORS {COLOR_WHITE, COLOR_WHITE, COLOR_YELLOW, COLOR_AQUA, COLOR_GREEN, COLOR_BLUE}
 #define TABLE_COLUMN_WIDTHS { \
@@ -51,6 +53,7 @@
     (TABLE_COLUMN_COUNT - 1) * TABLE_LINE_SEPARATOR_WIDTH + \
     TABLE_LINE_END_WIDTH \
 )
+// clang-format on
 
 #define TABLE_ITEMS_WIDTH (TABLE_LINE_WIDTH - TABLE_LINE_START_WIDTH - TABLE_LINE_END_WIDTH)
 

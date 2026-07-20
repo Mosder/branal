@@ -75,6 +75,24 @@ void print_column_names() {
     printf("\n");
 }
 
+int item_type_to_color(ItemType type) {
+    switch (type) {
+        case NORMAL:
+            return COLOR_WHITE;
+        case DRIF:
+            return COLOR_YELLOW;
+        case SYNG:
+            return COLOR_RED;
+        case SET:
+            return COLOR_GREEN;
+        case RARE:
+            return COLOR_AQUA;
+        case EPIC:
+            return COLOR_PURPLE;
+    }
+    return COLOR_WHITE;
+}
+
 void print_player_rewards(FriendlyResults results) {
     char buffers[TABLE_COLUMN_COUNT][TABLE_LINE_WIDTH];
     size_t widths[TABLE_COLUMN_COUNT] = TABLE_COLUMN_WIDTHS;
@@ -116,12 +134,13 @@ void print_player_rewards(FriendlyResults results) {
         size_t line_len = 0;
         for (size_t i = 0; i < results.num_items; i++) {
             char *sep = i < results.num_items - 1 ? ", " : "";
-            size_t item_len = utf8_strlen(results.items[i]) + strlen(sep);
+            size_t item_len = utf8_strlen(results.items[i].data) + strlen(sep);
             if (line_len + item_len > TABLE_ITEMS_WIDTH) {
                 printf("%*s" TABLE_LINE_END "\n" TABLE_LINE_START, (int)(TABLE_ITEMS_WIDTH - line_len), "");
                 line_len = 0;
             }
-            printf("%s%s", results.items[i], sep);
+            print_color(results.items[i].data, item_type_to_color(results.items[i].type));
+            printf("%s", sep);
             line_len += item_len;
         }
         printf("%*s" TABLE_LINE_END "\n", (int)(TABLE_ITEMS_WIDTH - line_len), "");
