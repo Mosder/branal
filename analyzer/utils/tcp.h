@@ -5,19 +5,19 @@
 
 #include "structures/heap.h"
 
+#ifndef TCP_H
+#define TCP_H
+
 typedef unsigned char byte_t;
 
 // struct to persistently store TCP segments
 // payload field is malloced and needs to be freed
-#ifndef TCP_SEGMENT_DEFINED
-#define TCP_SEGMENT_DEFINED
 typedef struct {
     byte_t *payload; // payload in the segment
     size_t len;      // length of the payload
     uint32_t seq;    // TCP sequence number of the segment
     uint16_t port;   // destination (client) port of connection the segment was received from
 } TCPSegment;
-#endif
 
 // get TCP segment from captured packet
 // params:
@@ -28,8 +28,6 @@ typedef struct {
 extern TCPSegment get_segment_from_packet(const byte_t *packet, const struct pcap_pkthdr *packet_data);
 
 // struct that stores all the information about stream
-#ifndef TCP_STREAM_DEFINED
-#define TCP_STREAM_DEFINED
 typedef struct {
     byte_t *data;    // bytes in the stream
     size_t len;      // length of the stream
@@ -38,7 +36,6 @@ typedef struct {
     uint16_t port;   // destination (client) port of current analyzed connection
     Heap *pending;   // min heap of segments yet to be added to stream (sorted by TCP sequence number)
 } TCPStream;
-#endif
 
 #define INIT_STREAM_CAPACITY 256
 
@@ -68,3 +65,5 @@ extern void remove_parsed_data(TCPStream *stream, size_t parsed_len);
 // returns:
 //      1 if the segment was added to the stream, 0 if it was discarded or saved to pending
 extern int handle_segment(TCPStream *stream, TCPSegment segment);
+
+#endif

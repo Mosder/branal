@@ -4,6 +4,9 @@
 #include "parser/parser_defs.h"
 #include "utils/tcp.h"
 
+#ifndef FIGHT_RESULTS_H
+#define FIGHT_RESULTS_H
+
 // Payload structure:
 // FIGHT_RESULTS_START EntityResults (SEPARATOR_ENTITY EntityResults)* FIGHT_RESULTS_END
 //
@@ -92,8 +95,6 @@
     &entity_results.saturation \
 }
 
-#ifndef ENTITY_RESULTS_DEFINED
-#define ENTITY_RESULTS_DEFINED
 typedef struct {
     int team; // friend or enemy
     char *name;
@@ -131,7 +132,6 @@ typedef struct {
     char *field34;
     char *saturation;
 } EntityResults;
-#endif
 
 // items/gear/drifs fields parsing info
 #define INIT_ITEMS_CAPACITY 8
@@ -143,8 +143,6 @@ typedef struct {
 #define TEAM_ENEMY 2
 
 // fight results data for friendly
-#ifndef FRIENDLY_RESULTS_DEFINED
-#define FRIENDLY_RESULTS_DEFINED
 typedef struct {
     char *name;
     int exp;
@@ -157,29 +155,24 @@ typedef struct {
     char *saturation_type;
     int saturation;
 } FriendlyResults;
-#endif
 
 // fight results data for enemy
-#ifndef ENEMY_RESULTS_DEFINED
-#define ENEMY_RESULTS_DEFINED
 typedef struct {
     char *name;
     int level;
 } EnemyResults;
-#endif
 
 #define MAX_ENTITIES_PER_SIDE 8
 
 // entire fight resutls
-#ifndef FIGHT_RESULTS_DEFINED
-#define FIGHT_RESULTS_DEFINED
 typedef struct {
     size_t num_friendly;
     FriendlyResults friendly_results[MAX_ENTITIES_PER_SIDE];
     size_t num_enemy;
     EnemyResults enemy_results[MAX_ENTITIES_PER_SIDE];
 } FightResults;
-#endif
 
 extern find_function_t find_fight_results;
 extern parse_function_t parse_fight_results;
+
+#endif

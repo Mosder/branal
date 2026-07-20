@@ -3,18 +3,13 @@
 
 #include "utils/tcp.h"
 
-#ifndef TYPE_ENUM_DEFINED
-#define TYPE_ENUM_DEFINED
+#ifndef PARSER_DEFS_H
+#define PARSER_DEFS_H
+
 typedef enum { INT, FLOAT, DOUBLE, STRING } TypeEnum;
-#endif
 
-#ifndef RESULTS_ENUM_DEFINED
-#define RESULTS_ENUM_DEFINED
 typedef enum { TYPE_FIGHT_RESULTS } ResultsEnum;
-#endif
 
-#ifndef PARSED_DATA_DEFINED
-#define PARSED_DATA_DEFINED
 // "generic" type for parsed data
 typedef struct {
     ResultsEnum data_type;            // type of data represented by an enum
@@ -22,7 +17,6 @@ typedef struct {
     void (*data_cleanup)(void *data); // function to cleanup internal allocations inside data
                                       // if no internal allocations - this should be NULL
 } ParsedData;
-#endif
 
 // find the first results data of specific type in stream
 // params:
@@ -42,10 +36,9 @@ typedef byte_t *find_function_t(TCPStream *stream, int offset, int *length);
 typedef ParsedData parse_function_t(byte_t *data, size_t length);
 
 // struct for holding the find and parse function for every result type
-#ifndef FIND_PARSE_FUNCTIONS_DEFINED
-#define FIND_PARSE_FUNCTIONS_DEFINED
 typedef struct {
     find_function_t *find_fn;
     parse_function_t *parse_fn;
 } FindParseFunctions;
+
 #endif
