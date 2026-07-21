@@ -426,7 +426,7 @@ typedef struct {
     int level;
     int psycho;
     int splinters;
-    char *saturation_type;
+    const char *saturation_type;
     int saturation;
 } FriendlyResults;
 

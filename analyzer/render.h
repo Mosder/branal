@@ -1,7 +1,7 @@
 // render.h
 // functions for "rendering" data onto the terminal
 
-#include "parser/fight_results.h"
+#include "parser/fight_results/fight_results.h"
 
 // ANSI escape sequence colors
 #define COLOR_GOLD 33

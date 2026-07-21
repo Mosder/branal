@@ -1,4 +1,4 @@
-#include "parser/fight_results.h"
+#include "parser/fight_results/fight_results.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -146,14 +146,6 @@ Orb get_orb(char *data, size_t length) {
     return orb;
 }
 
-char *get_artifact_size(int artifact_size_id) {
-    return artifact_size_id < id_to_artifact_size_len ? id_to_artifact_size[artifact_size_id] : "null";
-}
-
-char *get_orb_name(int orb_name_id) {
-    return orb_name_id < id_to_orb_name_len ? id_to_orb_name[orb_name_id] : "null";
-}
-
 void get_stars(char *buffer, int incr_above_b1) {
     char star_types[] = {'B', 'S', 'G'};
     sprintf(buffer, " (%c%d)", star_types[incr_above_b1 / 3], incr_above_b1 % 3 + '1');
@@ -221,7 +213,7 @@ void add_gear(FriendlyResults *results, size_t *items_capacity, char *gears_str)
             Item item;
             char buffer[SINGLE_ITEM_BUFFER_LEN];
             Orb orb = get_orb(gear.orb, strlen(gear.orb));
-            sprintf(buffer, "%sorb %s", get_artifact_size(orb.size), get_orb_name(orb.id));
+            sprintf(buffer, "%sorb %s", get_artifact_size_from_id(orb.size), get_orb_name_from_id(orb.id));
             item.data = strdup(buffer);
             destroy_orb(orb);
             item.type = ORB;
@@ -275,10 +267,6 @@ void add_drifs(FriendlyResults *results, size_t *items_capacity, char *drifs_str
     } while (drifs_separator);
 }
 
-char *get_item_name(int item_id) {
-    return item_id < id_to_item_name_len ? id_to_item_name[item_id] : "null";
-}
-
 void add_items(FriendlyResults *results, size_t *items_capacity, char *items_str) {
     if (strlen(items_str) == 0)
         return;
@@ -290,7 +278,7 @@ void add_items(FriendlyResults *results, size_t *items_capacity, char *items_str
 
         int item_id, item_count;
         sscanf(items_str, "%d,%d", &item_id, &item_count);
-        sprintf(buffer, "%dx %s", item_count, get_item_name(item_id));
+        sprintf(buffer, "%dx %s", item_count, get_item_name_from_id(item_id));
 
         // if there are still items - modify items_str pointer
         if (items_separator)
@@ -305,10 +293,6 @@ void add_items(FriendlyResults *results, size_t *items_capacity, char *items_str
             results->items = expand_items(results->items, items_capacity, results->num_items + 1);
         results->items[results->num_items++] = item;
     } while (items_separator);
-}
-
-char *get_saturation_type(int saturation_id) {
-    return saturation_id < id_to_saturation_type_len ? id_to_saturation_type[saturation_id] : "null";
 }
 
 // parse EntityResults to FriendlyResults
@@ -334,7 +318,7 @@ FriendlyResults parse_to_friendly(EntityResults entity_results) {
     if (strlen(entity_results.saturation) > 0) {
         int saturation_id;
         sscanf(entity_results.saturation, "%d,%d", &saturation_id, &results.saturation);
-        results.saturation_type = get_saturation_type(saturation_id);
+        results.saturation_type = get_saturation_type_from_id(saturation_id);
     }
 
     return results;

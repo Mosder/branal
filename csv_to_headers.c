@@ -6,74 +6,116 @@
 #define EXT ".csv"
 #define EXT_LEN strlen(".csv")
 #define CSV_PATH "csv"
-#define HEADER_PATH "analyzer/" CSV_PATH
+#define OUT_PATH "analyzer/" CSV_PATH
 
 #define BUFFER_SIZE 256
 #define MAX_ARR_SIZE 4096
 
-void create_header(char *file_name) {
-    // open input file
-    char input_path[BUFFER_SIZE];
-    sprintf(input_path, "%s/%s", CSV_PATH, file_name);
-    FILE *input_fp = fopen(input_path, "r");
+// read values from input csv and save them to buffers
+// returns max_index of the array
+int read_csv(char *path, char *from, char *to, char from_to_array[][BUFFER_SIZE]) {
+    FILE *fp = fopen(path, "r");
 
     // read field names
-    char from[BUFFER_SIZE], to[BUFFER_SIZE];
-    fscanf(input_fp, "%[^,],%[^\n]", from, to);
+    fscanf(fp, "%[^,],%[^\n]", from, to);
 
-    // read values from CSV
-    char from_to_array[MAX_ARR_SIZE][BUFFER_SIZE] = {""};
+    // read values
     size_t max_index = 0;
     size_t val1;
     char val2[BUFFER_SIZE];
-    while (fscanf(input_fp, "%zu,%[^\n]", &val1, val2) == 2) {
+    while (fscanf(fp, "%zu,%[^\n]", &val1, val2) == 2) {
         strcpy(from_to_array[val1], val2);
         if (val1 > max_index)
             max_index = val1;
     }
 
-    // close the input file
-    fclose(input_fp);
+    fclose(fp);
 
-    // create output file
-    char output_path[BUFFER_SIZE];
-    sprintf(output_path, "%s/%s_to_%s.h", HEADER_PATH, from, to);
-    FILE *output_fp = fopen(output_path, "w");
+    return max_index;
+}
 
-    // write comments and beginning of output array
-    fprintf(output_fp, "// %s\n", input_path);
-    fprintf(output_fp, "// array translating %s to %s - generated from csv file\n\n", from, to);
-    fprintf(output_fp, "char *%s_to_%s[] = {\n", from, to);
+// create output .h file
+void create_h(char *path, char *from, char *to) {
+    FILE *fp = fopen(path, "w");
+
+    // write comments and function prototype
+    fprintf(fp, "// %s\n", strstr(path, CSV_PATH));
+    fprintf(fp, "// translate %s to %s - generated from csv\n\n", from, to);
+    fprintf(fp, "// get %s from %s\n", to, from);
+    fprintf(fp, "// params:\n");
+    fprintf(fp, "//      - %s - %s to translate from\n", from, from);
+    fprintf(fp, "// returns:\n");
+    fprintf(fp, "//      %s corresponding to %s\n", to, from);
+    fprintf(fp, "extern const char *get_%s_from_%s(int %s);", to, from, from);
+
+    fclose(fp);
+}
+
+// create output .c file
+void create_c(char *path, char *h_path, char *from, char *to, char from_to_array[][BUFFER_SIZE], size_t max_index) {
+    FILE *fp = fopen(path, "w");
+
+    char arr_name[BUFFER_SIZE], arr_len_name[BUFFER_SIZE];
+    sprintf(arr_name, "%s_to_%s", from, to);
+    sprintf(arr_len_name, "%s_to_%s_len", from, to);
+
+    // write include and beginning of array
+    fprintf(fp, "#include \"%s\"\n\n", strstr(h_path, CSV_PATH));
+    fprintf(fp, "static const char *%s[] = {\n", arr_name);
 
     // write values
     for (size_t i = 0; i <= max_index; i++) {
         if (strlen(from_to_array[i]) > 0)
-            fprintf(output_fp, "    \"%s\",\n", from_to_array[i]);
+            fprintf(fp, "    \"%s\",\n", from_to_array[i]);
         else
-            fprintf(output_fp, "    \"%zu\",\n", i);
+            fprintf(fp, "    \"%zu\",\n", i);
     }
 
     // write the end of array and len
-    fprintf(output_fp, "};\n");
-    fprintf(output_fp, "int %s_to_%s_len = %zu;", from, to, max_index + 1);
+    fprintf(fp, "};\n");
+    fprintf(fp, "int %s = %zu;\n\n", arr_len_name, max_index + 1);
 
-    // close the output file
-    fclose(output_fp);
+    // write the getter
+    fprintf(fp, "const char *get_%s_from_%s(int %s) {\n", to, from, from);
+    fprintf(fp, "    return %s >= 0 && %s < %s ? %s[%s] : \"null\";\n", from, from, arr_len_name, arr_name, from);
+    fprintf(fp, "}");
+
+    fclose(fp);
+}
+
+void create_table(char *file_name) {
+    // read from input file
+    char input_path[BUFFER_SIZE];
+    sprintf(input_path, "%s/%s", CSV_PATH, file_name);
+    char from[BUFFER_SIZE], to[BUFFER_SIZE];
+    char from_to_array[MAX_ARR_SIZE][BUFFER_SIZE] = {0};
+    size_t max_index = read_csv(input_path, from, to, from_to_array);
+
+    // create output .h file
+    char h_path[BUFFER_SIZE];
+    sprintf(h_path, "%s/%s_to_%s.h", OUT_PATH, from, to);
+    create_h(h_path, from, to);
+
+    // create output .c file
+    char c_path[BUFFER_SIZE];
+    sprintf(c_path, "%s/%s_to_%s.c", OUT_PATH, from, to);
+    create_c(c_path, h_path, from, to, from_to_array, max_index);
 }
 
 int main() {
-    // make directory for csv header files
-    mkdir(HEADER_PATH, 0755);
+    // make directory for output files
+    mkdir(OUT_PATH, 0755);
 
     DIR *csv_dir = opendir(CSV_PATH);
     struct dirent *entry;
     while ((entry = readdir(csv_dir))) {
         char *file_name = entry->d_name;
         size_t file_name_len = strlen(file_name);
-        // create header for each *.csv file
+        // create lookup tables for each *.csv file
         if (file_name_len > EXT_LEN && strcmp(file_name + file_name_len - EXT_LEN, EXT) == 0)
-            create_header(entry->d_name);
+            create_table(entry->d_name);
     }
     closedir(csv_dir);
+
     return 0;
 }

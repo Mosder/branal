@@ -15,9 +15,10 @@ compile: csv structures utils parser capture analyzer render
 	rm *.o
 
 csv:
-	$(CC) csv_to_headers.c -o csv_to_headers
+	$(CC) $(CFLAGS) csv_to_headers.c -o csv_to_headers
 	./csv_to_headers
 	rm csv_to_headers
+	$(CC) $(CFLAGS) -c analyzer/csv/*.c
 
 structures:
 	$(CC) $(CFLAGS) -c analyzer/structures/hashmap.c
@@ -32,7 +33,7 @@ utils:
 
 parser:
 	$(CC) $(CFLAGS) -c analyzer/parser/parser.c
-	$(CC) $(CFLAGS) -c analyzer/parser/fight_results.c
+	$(CC) $(CFLAGS) -c analyzer/parser/fight_results/fight_results.c
 
 capture:
 	$(CC) $(CFLAGS) -c analyzer/capture.c
