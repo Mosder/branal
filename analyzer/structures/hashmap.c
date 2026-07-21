@@ -33,7 +33,7 @@ void hashmap_put(HashMap *map, void *key, void *value) {
         if (map->compare(key, node->key)) {
             // ensure no hanging memory allocation
             if (map->value_cleanup) {
-                map->value_cleanup(node);
+                map->value_cleanup(node->value);
             }
             memcpy(node->value, value, map->value_size);
             return;
@@ -72,10 +72,10 @@ void *hashmap_get(HashMap *map, void *key) {
 
 void free_node_without_next(HashMap *map, HashMapNode *node) {
     if (map->key_cleanup) {
-        map->key_cleanup(node);
+        map->key_cleanup(node->key);
     }
     if (map->value_cleanup) {
-        map->value_cleanup(node);
+        map->value_cleanup(node->value);
     }
     free(node->key);
     free(node->value);
