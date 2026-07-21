@@ -1,7 +1,7 @@
 // parser/find_parse_functions.h
 // array of find and parse functions for every result type
 
-#include "parser/fight_results.h"
+#include "parser/fight_results/fight_results.h"
 
 #define RESULT_TYPE_COUNT 1
 

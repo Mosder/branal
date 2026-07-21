@@ -1,7 +1,7 @@
 // parser/parser.h
 // main parser file
 
-#include "parser/fight_results.h"
+#include "parser/fight_results/fight_results.h"
 #include "parser/parser_defs.h"
 #include "utils/tcp.h"
 
