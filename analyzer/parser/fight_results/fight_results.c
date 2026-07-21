@@ -8,6 +8,13 @@
 #include "csv/id_to_item_name.h"
 #include "csv/id_to_orb_name.h"
 #include "csv/id_to_saturation_type.h"
+#include "parser/fight_results/drif.h"
+#include "parser/fight_results/entity.h"
+#include "parser/fight_results/gear.h"
+#include "parser/fight_results/gear_info.h"
+#include "parser/fight_results/orb.h"
+#include "parser/structs.h"
+#include "utils/memory.h"
 #include "utils/roman.h"
 
 // function to cleanup fight results to be used in ParsedData struct
@@ -29,73 +36,9 @@ byte_t *find_fight_results(TCPStream *stream, int offset, int *length) {
     byte_t *start = memmem(stream->data + offset, stream->len - offset, FIGHT_RESULTS_START, strlen(FIGHT_RESULTS_START));
     byte_t *end = NULL;
     if (start)
-        end = memmem(start, stream->len - offset, FIGHT_RESULTS_END, strlen(FIGHT_RESULTS_END));
+        end = memmem(start, stream->len - (start - stream->data), FIGHT_RESULTS_END, strlen(FIGHT_RESULTS_END));
     *length = end ? end - start + strlen(FIGHT_RESULTS_END) : -1;
     return start;
-}
-
-// save to a field in struct depending on the type
-void save_to_struct(TypeEnum type, void *field, char *src, size_t src_len) {
-    char *str = malloc(src_len + 1);
-    memcpy(str, src, src_len);
-    str[src_len] = '\0';
-
-    // parse depending on variable type
-    switch (type) {
-        case INT:
-            sscanf(str, "%d", (int *)field);
-            free(str);
-            break;
-        case FLOAT:
-            sscanf(str, "%f", (float *)field);
-            free(str);
-            break;
-        case DOUBLE:
-            sscanf(str, "%lf", (double *)field);
-            free(str);
-            break;
-        case STRING:
-            *(char **)field = str;
-            break;
-    }
-}
-
-// fill struct fields from given data of given length
-void get_struct_data(size_t field_count, TypeEnum *field_types, void **field_pointers, char *data_separator, char *data, size_t data_len) {
-    for (size_t i = 0; i < field_count; i++) {
-        char *sep = memmem(data, data_len, data_separator, strlen(data_separator));
-        size_t len = sep ? sep - data : data_len;
-        save_to_struct(field_types[i], field_pointers[i], (char *)data, len);
-
-        // update data pointer and length
-        if (sep) {
-            data_len -= sep - data + strlen(data_separator);
-            data = sep + strlen(data_separator);
-        }
-    }
-}
-
-// free struct fields which are STRING
-void destroy_struct(size_t field_count, TypeEnum *field_types, void **field_pointers) {
-    for (size_t i = 0; i < field_count; i++) {
-        if (field_types[i] == STRING)
-            free(*(char **)field_pointers[i]);
-    }
-}
-
-void destroy_entity_results(EntityResults results) {
-    TypeEnum field_types[ENTITY_FIELD_COUNT] = ENTITY_FIELD_TYPES;
-    void *field_pointers[ENTITY_FIELD_COUNT] = ENTITY_FIELD_ADDRESSES(results);
-    destroy_struct(ENTITY_FIELD_COUNT, field_types, field_pointers);
-}
-
-// get entity results from the string
-EntityResults get_entity_results(byte_t *data, size_t length) {
-    EntityResults results;
-    TypeEnum field_types[ENTITY_FIELD_COUNT] = ENTITY_FIELD_TYPES;
-    void *field_pointers[ENTITY_FIELD_COUNT] = ENTITY_FIELD_ADDRESSES(results);
-    get_struct_data(ENTITY_FIELD_COUNT, field_types, field_pointers, SEPARATOR_RESULT, (char *)data, length);
-    return results;
 }
 
 Item *expand_items(Item *items, size_t *items_capacity, size_t to_fit) {
@@ -104,51 +47,9 @@ Item *expand_items(Item *items, size_t *items_capacity, size_t to_fit) {
     return realloc(items, *items_capacity * sizeof(Item));
 }
 
-void destroy_gear(Gear gear) {
-    TypeEnum field_types[GEAR_FIELD_COUNT] = GEAR_FIELD_TYPES;
-    void *field_pointers[GEAR_FIELD_COUNT] = GEAR_FIELD_ADDRESSES(gear);
-    destroy_struct(GEAR_FIELD_COUNT, field_types, field_pointers);
-}
-
-Gear get_gear(char *data, size_t length) {
-    Gear gear;
-    TypeEnum field_types[GEAR_FIELD_COUNT] = GEAR_FIELD_TYPES;
-    void *field_pointers[GEAR_FIELD_COUNT] = GEAR_FIELD_ADDRESSES(gear);
-    get_struct_data(GEAR_FIELD_COUNT, field_types, field_pointers, SEPARATOR_GEAR_FIELDS, data, length);
-    return gear;
-}
-
-void destroy_gear_info(GearInfo gear_info) {
-    TypeEnum field_types[GEAR_INFO_FIELD_COUNT] = GEAR_INFO_FIELD_TYPES;
-    void *field_pointers[GEAR_INFO_FIELD_COUNT] = GEAR_INFO_FIELD_ADDRESSES(gear_info);
-    destroy_struct(GEAR_INFO_FIELD_COUNT, field_types, field_pointers);
-}
-
-GearInfo get_gear_info(char *data, size_t length) {
-    GearInfo gear_info;
-    TypeEnum field_types[GEAR_INFO_FIELD_COUNT] = GEAR_INFO_FIELD_TYPES;
-    void *field_pointers[GEAR_INFO_FIELD_COUNT] = GEAR_INFO_FIELD_ADDRESSES(gear_info);
-    get_struct_data(GEAR_INFO_FIELD_COUNT, field_types, field_pointers, SEPARATOR_GEAR_INFO_FIELDS, data, length);
-    return gear_info;
-}
-
-void destroy_orb(Orb orb) {
-    TypeEnum field_types[ORB_FIELD_COUNT] = ORB_FIELD_TYPES;
-    void *field_pointers[ORB_FIELD_COUNT] = ORB_FIELD_ADDRESSES(orb);
-    destroy_struct(ORB_FIELD_COUNT, field_types, field_pointers);
-}
-
-Orb get_orb(char *data, size_t length) {
-    Orb orb;
-    TypeEnum field_types[ORB_FIELD_COUNT] = ORB_FIELD_TYPES;
-    void *field_pointers[ORB_FIELD_COUNT] = ORB_FIELD_ADDRESSES(orb);
-    get_struct_data(ORB_FIELD_COUNT, field_types, field_pointers, SEPARATOR_ORB_FIELDS, data, length);
-    return orb;
-}
-
 void get_stars(char *buffer, int incr_above_b1) {
     char star_types[] = {'B', 'S', 'G'};
-    sprintf(buffer, " (%c%d)", star_types[incr_above_b1 / 3], incr_above_b1 % 3 + '1');
+    sprintf(buffer, " (%c%d)", star_types[incr_above_b1 / 3], incr_above_b1 % 3 + 1);
 }
 
 void add_gear(FriendlyResults *results, size_t *items_capacity, char *gears_str) {
@@ -157,16 +58,19 @@ void add_gear(FriendlyResults *results, size_t *items_capacity, char *gears_str)
 
     char *gears_separator;
     do {
-        gears_separator = strstr(gears_str, SEPARATOR_GEARS);
-        Gear gear = get_gear(gears_str, gears_separator ? gears_separator - gears_str : strlen(gears_str));
+        gears_separator = strstr(gears_str, SEPARATOR_GEAR);
+        size_t len = gears_separator ? gears_separator - gears_str : strlen(gears_str);
+        Gear gear = {0};
+        fill_struct(&gear, gear_fields, ARR_LEN(gear_fields), gears_str, len, SEPARATOR_GEAR_FIELD);
 
         // if there are still gears - modify gears_str pointer
         if (gears_separator)
-            gears_str = gears_separator + strlen(SEPARATOR_GEARS);
+            gears_str = gears_separator + strlen(SEPARATOR_GEAR);
 
         Item item;
 
-        GearInfo gear_info = get_gear_info(gear.info, strlen(gear.info));
+        GearInfo gear_info = {0};
+        fill_struct(&gear_info, gear_info_fields, ARR_LEN(gear_info_fields), gear.info, strlen(gear.info), SEPARATOR_GEAR_INFO_FIELD);
         char buffer[SINGLE_ITEM_BUFFER_LEN];
         char roman[5];
         to_roman(roman, gear_info.rank);
@@ -174,8 +78,11 @@ void add_gear(FriendlyResults *results, size_t *items_capacity, char *gears_str)
         switch (gear.type) {
             case TYPE_SYNG_NORMAL:
                 // atoi should be fine, since syng_tier starts from 1 for syngs
-                if (atoi(gear.syng_tier))
-                    sprintf(buffer, "%s (%d)", buffer, gear_info.lvl);
+                if (atoi(gear.syng_tier)) {
+                    char lvl[7];
+                    sprintf(lvl, " (%d)", gear_info.lvl);
+                    strcat(buffer, lvl);
+                }
                 break;
             default: {
                 char stars[6];
@@ -185,7 +92,7 @@ void add_gear(FriendlyResults *results, size_t *items_capacity, char *gears_str)
             }
         }
         item.data = strdup(buffer);
-        destroy_gear_info(gear_info);
+        cleanup_struct(&gear_info, gear_info_fields, ARR_LEN(gear_info_fields));
 
         switch (gear.type) {
             case TYPE_SYNG_NORMAL:
@@ -212,10 +119,11 @@ void add_gear(FriendlyResults *results, size_t *items_capacity, char *gears_str)
         if (strlen(gear.orb)) {
             Item item;
             char buffer[SINGLE_ITEM_BUFFER_LEN];
-            Orb orb = get_orb(gear.orb, strlen(gear.orb));
+            Orb orb = {0};
+            fill_struct(&orb, orb_fields, ARR_LEN(orb_fields), gear.orb, strlen(gear.orb), SEPARATOR_ORB_FIELD);
             sprintf(buffer, "%sorb %s", get_artifact_size_from_id(orb.size), get_orb_name_from_id(orb.id));
             item.data = strdup(buffer);
-            destroy_orb(orb);
+            cleanup_struct(&orb, orb_fields, ARR_LEN(orb_fields));
             item.type = ORB;
             // expand if needed
             if (results->num_items >= *items_capacity)
@@ -223,22 +131,8 @@ void add_gear(FriendlyResults *results, size_t *items_capacity, char *gears_str)
             results->items[results->num_items++] = item;
         }
 
-        destroy_gear(gear);
+        cleanup_struct(&gear, gear_fields, ARR_LEN(gear_fields));
     } while (gears_separator);
-}
-
-void destroy_drif(Drif drif) {
-    TypeEnum field_types[DRIF_FIELD_COUNT] = DRIF_FIELD_TYPES;
-    void *field_pointers[DRIF_FIELD_COUNT] = DRIF_FIELD_ADDRESSES(drif);
-    destroy_struct(DRIF_FIELD_COUNT, field_types, field_pointers);
-}
-
-Drif get_drif(char *data, size_t length) {
-    Drif drif;
-    TypeEnum field_types[DRIF_FIELD_COUNT] = DRIF_FIELD_TYPES;
-    void *field_pointers[DRIF_FIELD_COUNT] = DRIF_FIELD_ADDRESSES(drif);
-    get_struct_data(DRIF_FIELD_COUNT, field_types, field_pointers, SEPARATOR_DRIF_FIELDS, data, length);
-    return drif;
 }
 
 void add_drifs(FriendlyResults *results, size_t *items_capacity, char *drifs_str) {
@@ -247,23 +141,25 @@ void add_drifs(FriendlyResults *results, size_t *items_capacity, char *drifs_str
 
     char *drifs_separator;
     do {
-        drifs_separator = strstr(drifs_str, SEPARATOR_DRIFS);
-        Drif drif = get_drif(drifs_str, drifs_separator ? drifs_separator - drifs_str : strlen(drifs_str));
+        drifs_separator = strstr(drifs_str, SEPARATOR_DRIF);
+        size_t len = drifs_separator ? drifs_separator - drifs_str : strlen(drifs_str);
+        Drif drif = {0};
+        fill_struct(&drif, drif_fields, ARR_LEN(drif_fields), drifs_str, len, SEPARATOR_DRIF_FIELD);
 
         // if there are still drifs - modify drifs_str pointer
         if (drifs_separator)
-            drifs_str = drifs_separator + strlen(SEPARATOR_DRIFS);
+            drifs_str = drifs_separator + strlen(SEPARATOR_DRIF);
 
         Item item;
         item.data = strdup(drif.name);
         item.type = DRIF;
 
+        cleanup_struct(&drif, drif_fields, ARR_LEN(drif_fields));
+
         // expand if needed
         if (results->num_items >= *items_capacity)
             results->items = expand_items(results->items, items_capacity, results->num_items + 1);
         results->items[results->num_items++] = item;
-
-        destroy_drif(drif);
     } while (drifs_separator);
 }
 
@@ -350,7 +246,9 @@ ParsedData parse_fight_results(byte_t *data, size_t length) {
     do {
         // get generic entity results
         entity_separator = memmem(data, length, SEPARATOR_ENTITY, strlen(SEPARATOR_ENTITY));
-        EntityResults entity_results = get_entity_results(data, entity_separator ? entity_separator - data : length);
+        size_t len = entity_separator ? entity_separator - data : length;
+        EntityResults entity_results = {0};
+        fill_struct(&entity_results, entity_fields, ARR_LEN(entity_fields), (char *)data, len, SEPARATOR_ENTITY_FIELD);
 
         // depending on team - parse it into friendly or enemy results
         switch (entity_results.team) {
@@ -361,7 +259,8 @@ ParsedData parse_fight_results(byte_t *data, size_t length) {
                 results->enemy_results[results->num_enemy++] = parse_to_enemy(entity_results);
                 break;
         }
-        destroy_entity_results(entity_results);
+
+        cleanup_struct(&entity_results, entity_fields, ARR_LEN(entity_fields));
 
         // if there are still entities - modify data pointer and length
         if (entity_separator) {

@@ -63,14 +63,10 @@ void print_enemy_list(EnemyResults *results, size_t n_enemies) {
 }
 
 void print_column_names() {
-    char *names[TABLE_COLUMN_COUNT] = TABLE_COLUMN_NAMES;
-    int colors[TABLE_COLUMN_COUNT] = TABLE_COLUMN_COLORS;
-    size_t widths[TABLE_COLUMN_COUNT] = TABLE_COLUMN_WIDTHS;
-
     printf(TABLE_LINE_START);
-    for (size_t i = 0; i < TABLE_COLUMN_COUNT; i++) {
-        print_center(names[i], colors[i], widths[i], ' ');
-        printf(i < TABLE_COLUMN_COUNT - 1 ? TABLE_LINE_SEPARATOR : TABLE_LINE_END);
+    for (size_t i = 0; i < ARR_LEN(columns); i++) {
+        print_center(columns[i].name, columns[i].color, columns[i].width, ' ');
+        printf(i < ARR_LEN(columns) - 1 ? TABLE_LINE_SEPARATOR : TABLE_LINE_END);
     }
     printf("\n");
 }
@@ -96,9 +92,7 @@ int item_type_to_color(ItemType type) {
 }
 
 void print_player_rewards(FriendlyResults results) {
-    char buffers[TABLE_COLUMN_COUNT][TABLE_LINE_WIDTH];
-    size_t widths[TABLE_COLUMN_COUNT] = TABLE_COLUMN_WIDTHS;
-    int colors[TABLE_COLUMN_COUNT] = TABLE_COLUMN_COLORS;
+    char buffers[ARR_LEN(columns)][TABLE_LINE_WIDTH];
 
     sprintf(buffers[0], "%s (%d)", results.name, results.level);
     sprintf(buffers[1], "%d", results.exp);
@@ -120,11 +114,11 @@ void print_player_rewards(FriendlyResults results) {
         sprintf(buffers[5], "-");
 
     printf(TABLE_LINE_START);
-    for (size_t i = 0; i < TABLE_COLUMN_COUNT; i++) {
-        char to_color[widths[i] + 1];
-        sprintf(to_color, "%*s", (int)widths[i], buffers[i]);
-        print_color(to_color, colors[i]);
-        printf(i < TABLE_COLUMN_COUNT - 1 ? TABLE_LINE_SEPARATOR : TABLE_LINE_END);
+    for (size_t i = 0; i < ARR_LEN(columns); i++) {
+        char to_color[columns[i].width + 1];
+        sprintf(to_color, "%*s", (int)columns[i].width, buffers[i]);
+        print_color(to_color, columns[i].color);
+        printf(i < ARR_LEN(columns) - 1 ? TABLE_LINE_SEPARATOR : TABLE_LINE_END);
     }
     printf("\n");
 

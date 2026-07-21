@@ -33,6 +33,7 @@ utils:
 
 parser:
 	$(CC) $(CFLAGS) -c analyzer/parser/parser.c
+	$(CC) $(CFLAGS) -c analyzer/parser/structs.c
 	$(CC) $(CFLAGS) -c analyzer/parser/fight_results/fight_results.c
 
 capture:

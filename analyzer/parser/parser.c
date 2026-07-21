@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "parser/find_parse_functions.h"
+#include "utils/memory.h"
 
 // expand parsed data exponentially to fit el_count elements
 ParsedData *expand_parsed_data(ParsedData *parsed_data, size_t *capacity, size_t el_count) {
@@ -14,7 +15,7 @@ ParsedData *expand_parsed_data(ParsedData *parsed_data, size_t *capacity, size_t
 // find earliest data to parse in stream
 byte_t *find_earliest_data(TCPStream *stream, int stream_offset, int *earliest_length, parse_function_t **earliest_parse_fun) {
     byte_t *earliest_data = NULL;
-    for (size_t i = 0; i < RESULT_TYPE_COUNT; i++) {
+    for (size_t i = 0; i < ARR_LEN(all_find_parse_functions); i++) {
         int length;
         byte_t *data = all_find_parse_functions[i].find_fn(stream, stream_offset, &length);
         // if it's the first found or earlier than earliest - save it

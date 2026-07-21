@@ -6,8 +6,6 @@
 #ifndef PARSER_DEFS_H
 #define PARSER_DEFS_H
 
-typedef enum { INT, FLOAT, DOUBLE, STRING } TypeEnum;
-
 typedef enum { TYPE_FIGHT_RESULTS } ResultsEnum;
 
 // "generic" type for parsed data
