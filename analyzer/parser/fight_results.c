@@ -27,8 +27,10 @@ void cleanup_fight_results(void *data) {
 
 byte_t *find_fight_results(TCPStream *stream, int offset, int *length) {
     byte_t *start = memmem(stream->data + offset, stream->len - offset, FIGHT_RESULTS_START, strlen(FIGHT_RESULTS_START));
-    byte_t *end = memmem(stream->data + offset, stream->len - offset, FIGHT_RESULTS_END, strlen(FIGHT_RESULTS_END));
-    *length = start != NULL && end != NULL ? end - start + strlen(FIGHT_RESULTS_END) : -1;
+    byte_t *end = NULL;
+    if (start)
+        end = memmem(start, stream->len - offset, FIGHT_RESULTS_END, strlen(FIGHT_RESULTS_END));
+    *length = end ? end - start + strlen(FIGHT_RESULTS_END) : -1;
     return start;
 }
 
@@ -67,8 +69,8 @@ void get_struct_data(size_t field_count, TypeEnum *field_types, void **field_poi
 
         // update data pointer and length
         if (sep) {
-            data_len -= sep - data + strlen(SEPARATOR_RESULT);
-            data = sep + strlen(SEPARATOR_RESULT);
+            data_len -= sep - data + strlen(data_separator);
+            data = sep + strlen(data_separator);
         }
     }
 }
@@ -154,9 +156,7 @@ char *get_orb_name(int orb_name_id) {
 
 void get_stars(char *buffer, int incr_above_b1) {
     char star_types[] = {'B', 'S', 'G'};
-    buffer[0] = star_types[incr_above_b1 / 3];
-    buffer[1] = incr_above_b1 % 3 + 1 + '0';
-    buffer[2] = '\0';
+    sprintf(buffer, " (%c%d)", star_types[incr_above_b1 / 3], incr_above_b1 % 3 + '1');
 }
 
 void add_gear(FriendlyResults *results, size_t *items_capacity, char *gears_str) {
@@ -170,11 +170,7 @@ void add_gear(FriendlyResults *results, size_t *items_capacity, char *gears_str)
 
         // if there are still gears - modify gears_str pointer
         if (gears_separator)
-            gears_str = gears_separator + strlen(SEPARATOR_DRIFS);
-
-        // expand if needed
-        if (results->num_items >= *items_capacity)
-            results->items = expand_items(results->items, items_capacity, results->num_items + 1);
+            gears_str = gears_separator + strlen(SEPARATOR_GEARS);
 
         Item item;
 
@@ -190,9 +186,9 @@ void add_gear(FriendlyResults *results, size_t *items_capacity, char *gears_str)
                     sprintf(buffer, "%s (%d)", buffer, gear_info.lvl);
                 break;
             default: {
-                char stars[3];
+                char stars[6];
                 get_stars(stars, gear_info.stars);
-                sprintf(buffer, "%s (%s)", buffer, stars);
+                strcat(buffer, stars);
                 break;
             }
         }
@@ -215,6 +211,9 @@ void add_gear(FriendlyResults *results, size_t *items_capacity, char *gears_str)
                 break;
         }
 
+        // expand if needed
+        if (results->num_items >= *items_capacity)
+            results->items = expand_items(results->items, items_capacity, results->num_items + 1);
         results->items[results->num_items++] = item;
 
         // add orb to items if it exists
@@ -226,6 +225,9 @@ void add_gear(FriendlyResults *results, size_t *items_capacity, char *gears_str)
             item.data = strdup(buffer);
             destroy_orb(orb);
             item.type = ORB;
+            // expand if needed
+            if (results->num_items >= *items_capacity)
+                results->items = expand_items(results->items, items_capacity, results->num_items + 1);
             results->items[results->num_items++] = item;
         }
 
@@ -260,13 +262,13 @@ void add_drifs(FriendlyResults *results, size_t *items_capacity, char *drifs_str
         if (drifs_separator)
             drifs_str = drifs_separator + strlen(SEPARATOR_DRIFS);
 
-        // expand if needed
-        if (results->num_items >= *items_capacity)
-            results->items = expand_items(results->items, items_capacity, results->num_items + 1);
-
         Item item;
         item.data = strdup(drif.name);
         item.type = DRIF;
+
+        // expand if needed
+        if (results->num_items >= *items_capacity)
+            results->items = expand_items(results->items, items_capacity, results->num_items + 1);
         results->items[results->num_items++] = item;
 
         destroy_drif(drif);
@@ -294,13 +296,13 @@ void add_items(FriendlyResults *results, size_t *items_capacity, char *items_str
         if (items_separator)
             items_str = items_separator + strlen(SEPARATOR_ITEMS);
 
-        // expand if needed
-        if (results->num_items >= *items_capacity)
-            results->items = expand_items(results->items, items_capacity, results->num_items + 1);
-
         Item item;
         item.data = strdup(buffer);
         item.type = NORMAL;
+
+        // expand if needed
+        if (results->num_items >= *items_capacity)
+            results->items = expand_items(results->items, items_capacity, results->num_items + 1);
         results->items[results->num_items++] = item;
     } while (items_separator);
 }
