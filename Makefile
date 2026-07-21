@@ -28,6 +28,7 @@ utils:
 	$(CC) $(CFLAGS) -c analyzer/utils/time.c
 	$(CC) $(CFLAGS) -c analyzer/utils/tcp.c
 	$(CC) $(CFLAGS) -c analyzer/utils/tcp_seq_math.c
+	$(CC) $(CFLAGS) -c analyzer/utils/roman.c
 
 parser:
 	$(CC) $(CFLAGS) -c analyzer/parser/parser.c

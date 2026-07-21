@@ -81,6 +81,8 @@ int item_type_to_color(ItemType type) {
             return COLOR_WHITE;
         case DRIF:
             return COLOR_YELLOW;
+        case ORB:
+            return COLOR_GOLD;
         case SYNG:
             return COLOR_RED;
         case SET:

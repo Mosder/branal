@@ -4,6 +4,8 @@
 #include "parser/fight_results.h"
 
 // ANSI escape sequence colors
+#define COLOR_GOLD 33
+#define COLOR_GRAY 90
 #define COLOR_RED 91
 #define COLOR_GREEN 92
 #define COLOR_YELLOW 93
@@ -34,24 +36,24 @@
 #define TABLE_COLUMN_NAMES {"Nick (LVL)", "EXP", "Gold", "Psycho", "Saturation", "Splinters"}
 #define TABLE_COLUMN_COLORS {COLOR_WHITE, COLOR_WHITE, COLOR_YELLOW, COLOR_AQUA, COLOR_GREEN, COLOR_BLUE}
 #define TABLE_COLUMN_WIDTHS { \
-    TABLE_NAME_LVL_WIDTH, \
-    TABLE_EXP_WIDTH, \
-    TABLE_GOLD_WIDTH, \
-    TABLE_PSYCHO_WIDTH, \
+    TABLE_NAME_LVL_WIDTH,   \
+    TABLE_EXP_WIDTH,        \
+    TABLE_GOLD_WIDTH,       \
+    TABLE_PSYCHO_WIDTH,     \
     TABLE_SATURATION_WIDTH, \
-    TABLE_SPLINTERS_WIDTH \
+    TABLE_SPLINTERS_WIDTH,  \
 }
 
 #define TABLE_LINE_WIDTH ( \
     TABLE_LINE_START_WIDTH + \
-    TABLE_NAME_LVL_WIDTH + \
-    TABLE_EXP_WIDTH + \
-    TABLE_GOLD_WIDTH + \
-    TABLE_PSYCHO_WIDTH + \
+    TABLE_NAME_LVL_WIDTH +   \
+    TABLE_EXP_WIDTH +        \
+    TABLE_GOLD_WIDTH +       \
+    TABLE_PSYCHO_WIDTH +     \
     TABLE_SATURATION_WIDTH + \
-    TABLE_SPLINTERS_WIDTH + \
+    TABLE_SPLINTERS_WIDTH +  \
     (TABLE_COLUMN_COUNT - 1) * TABLE_LINE_SEPARATOR_WIDTH + \
-    TABLE_LINE_END_WIDTH \
+    TABLE_LINE_END_WIDTH     \
 )
 // clang-format on
 
