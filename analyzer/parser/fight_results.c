@@ -26,8 +26,8 @@ void cleanup_fight_results(void *data) {
 }
 
 byte_t *find_fight_results(TCPStream *stream, int offset, int *length) {
-    byte_t *start = memmem(stream->data + offset, stream->len, FIGHT_RESULTS_START, strlen(FIGHT_RESULTS_START));
-    byte_t *end = memmem(stream->data + offset, stream->len, FIGHT_RESULTS_END, strlen(FIGHT_RESULTS_END));
+    byte_t *start = memmem(stream->data + offset, stream->len - offset, FIGHT_RESULTS_START, strlen(FIGHT_RESULTS_START));
+    byte_t *end = memmem(stream->data + offset, stream->len - offset, FIGHT_RESULTS_END, strlen(FIGHT_RESULTS_END));
     *length = start != NULL && end != NULL ? end - start + strlen(FIGHT_RESULTS_END) : -1;
     return start;
 }
