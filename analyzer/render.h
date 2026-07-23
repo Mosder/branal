@@ -38,17 +38,14 @@ static const ColumnInfo columns[] = {
     {"Saturation", 13, COLOR_GREEN},
     {"Splinters", 9, COLOR_BLUE},
 };
+static const inline size_t sum_col_widths() {
+    size_t sum = 0;
+    for (size_t i = 0; i < ARR_LEN(columns); i++)
+        sum += columns[i].width;
+    return sum;
+}
 
-// clang-format off
-#define SUM_COL_WIDTHS ({                         \
-    size_t sum = 0;                               \
-    for (size_t i = 0; i < ARR_LEN(columns); i++) \
-        sum += columns[i].width;                  \
-    sum;                                          \
-})
-// clang-format on
-
-#define TABLE_LINE_WIDTH (TABLE_LINE_START_WIDTH + SUM_COL_WIDTHS + (ARR_LEN(columns) - 1) * TABLE_LINE_SEPARATOR_WIDTH + TABLE_LINE_END_WIDTH)
+#define TABLE_LINE_WIDTH (TABLE_LINE_START_WIDTH + sum_col_widths() + (ARR_LEN(columns) - 1) * TABLE_LINE_SEPARATOR_WIDTH + TABLE_LINE_END_WIDTH)
 
 #define TABLE_ITEMS_WIDTH (TABLE_LINE_WIDTH - TABLE_LINE_START_WIDTH - TABLE_LINE_END_WIDTH)
 
