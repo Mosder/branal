@@ -4,12 +4,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "utils/memory.h"
+
 void fill_struct(void *obj, const StructField *fields, size_t n_fields, const char *data, size_t data_len, const char *sep) {
     for (size_t i = 0; i < n_fields; i++) {
         char *next_sep = memmem(data, data_len, sep, strlen(sep));
         size_t len = next_sep ? next_sep - data : data_len;
 
-        char *str = malloc(len + 1);
+        char *str = safe_malloc(len + 1);
         memcpy(str, data, len);
         str[len] = '\0';
 

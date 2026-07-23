@@ -6,15 +6,19 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "utils/memory.h"
 #include "utils/tcp_seq_math.h"
 
 // initalize default TCP segment
 TCPSegment new_segment() {
-    TCPSegment segment;
-    segment.payload = NULL;
-    segment.len = 0;
-    segment.seq = 0;
-    segment.port = 0;
+    // clang-format off
+    TCPSegment segment = {
+        .payload = NULL,
+        .len = 0,
+        .seq = 0,
+        .port = 0
+    };
+    // clang-format on
     return segment;
 }
 
@@ -61,19 +65,22 @@ TCPSegment get_segment_from_packet(const byte_t *packet, const struct pcap_pkthd
     // get payload
     int total_header_len = eth_header_len + ip_header_len + tcp_header_len;
     segment.len = packet_data->caplen - total_header_len;
-    segment.payload = malloc(segment.len);
+    segment.payload = safe_malloc(segment.len);
     memcpy(segment.payload, packet + total_header_len, segment.len);
     return segment;
 }
 
 TCPStream new_stream() {
-    TCPStream stream;
-    stream.data = malloc(INIT_STREAM_CAPACITY);
-    stream.len = 0;
-    stream.capacity = INIT_STREAM_CAPACITY;
-    stream.seq = 0;
-    stream.port = 0;
-    stream.pending = NULL;
+    // clang-format off
+    TCPStream stream = {
+        .data = safe_malloc(INIT_STREAM_CAPACITY),
+        .len = 0,
+        .capacity = INIT_STREAM_CAPACITY,
+        .seq = 0,
+        .port = 0,
+        .pending = NULL
+    };
+    // clang-format on
     return stream;
 }
 
@@ -107,20 +114,9 @@ int in_acceptable_range(TCPStream stream, TCPSegment segment) {
     return seq_in_range_ei(segment.seq, stream_expected, max_acceptable_seq);
 }
 
-// expand stream capacity exponentially to fit new_len
-void expand_stream_capacity(TCPStream *stream, size_t new_len) {
-    while (stream->capacity < new_len)
-        stream->capacity <<= 1;
-    stream->data = realloc(stream->data, stream->capacity);
-}
-
 // add segment directly to stream
 void add_segment(TCPStream *stream, TCPSegment segment, size_t data_start) {
-    size_t new_stream_len = stream->len + segment.len - data_start;
-    if (new_stream_len > stream->capacity)
-        expand_stream_capacity(stream, new_stream_len);
-    memcpy(stream->data + stream->len, segment.payload + data_start, segment.len - data_start);
-    stream->len = new_stream_len;
+    stream->data = array_concat(stream->data, 1, &stream->len, &stream->capacity, segment.payload + data_start, segment.len - data_start);
 }
 
 // add pending segments to the stream

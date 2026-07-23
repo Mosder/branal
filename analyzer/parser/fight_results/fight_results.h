@@ -44,14 +44,14 @@ typedef struct {
     int level;
 } EnemyResults;
 
-#define MAX_ENTITIES_PER_SIDE 8
+#define INIT_ENTITIES_PER_SIDE 6
 
 // entire fight resutls
 typedef struct {
     size_t num_friendly;
-    FriendlyResults friendly_results[MAX_ENTITIES_PER_SIDE];
+    FriendlyResults *friendly_results;
     size_t num_enemy;
-    EnemyResults enemy_results[MAX_ENTITIES_PER_SIDE];
+    EnemyResults *enemy_results;
 } FightResults;
 
 extern find_function_t find_fight_results;

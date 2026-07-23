@@ -5,13 +5,6 @@
 #include "parser/find_parse_functions.h"
 #include "utils/memory.h"
 
-// expand parsed data exponentially to fit el_count elements
-ParsedData *expand_parsed_data(ParsedData *parsed_data, size_t *capacity, size_t el_count) {
-    while (*capacity < el_count)
-        *capacity <<= 1;
-    return realloc(parsed_data, *capacity * sizeof(ParsedData));
-}
-
 // find earliest data to parse in stream
 byte_t *find_earliest_data(TCPStream *stream, int stream_offset, int *earliest_length, parse_function_t **earliest_parse_fun) {
     byte_t *earliest_data = NULL;
@@ -30,7 +23,7 @@ byte_t *find_earliest_data(TCPStream *stream, int stream_offset, int *earliest_l
 
 ParsedData *parse_stream(TCPStream *stream, size_t *parsed_len, size_t *n_parsed_data) {
     size_t parsed_data_capacity = INIT_PARSED_DATA_CAPACITY;
-    ParsedData *parsed_data = malloc(parsed_data_capacity * sizeof(ParsedData));
+    ParsedData *parsed_data = safe_malloc(parsed_data_capacity * sizeof(ParsedData));
     *n_parsed_data = 0;
 
     int stream_offset = 0;
@@ -50,11 +43,8 @@ ParsedData *parse_stream(TCPStream *stream, size_t *parsed_len, size_t *n_parsed
 
         // if data to parse was found, parse it and update the offset
         if (earliest_data) {
-            // if no capacity in parsed data array - expand it
-            if (*n_parsed_data >= parsed_data_capacity)
-                parsed_data = expand_parsed_data(parsed_data, &parsed_data_capacity, *n_parsed_data + 1);
-
-            parsed_data[(*n_parsed_data)++] = earliest_parse_fun(earliest_data, earliest_length);
+            ParsedData new_parsed = earliest_parse_fun(earliest_data, earliest_length);
+            parsed_data = array_append(parsed_data, sizeof(ParsedData), n_parsed_data, &parsed_data_capacity, &new_parsed);
             stream_offset = earliest_data - stream->data + earliest_length;
         }
     } while (earliest_data);

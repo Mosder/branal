@@ -3,9 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "utils/memory.h"
+
 Heap *heap_new(size_t element_size, int (*compare)(void *element1, void *element2), void (*element_cleanup)(void *element)) {
-    Heap *heap = malloc(sizeof(Heap));
-    heap->data = malloc(INIT_HEAP_CAPACITY * sizeof(void *));
+    Heap *heap = safe_malloc(sizeof(Heap));
+    heap->data = safe_malloc(INIT_HEAP_CAPACITY * sizeof(void *));
     heap->n_elements = 0;
     heap->element_size = element_size;
     heap->capacity = INIT_HEAP_CAPACITY;
@@ -40,7 +42,7 @@ void swap(void **p_el1, void **p_el2) {
 void expand_heap(Heap *heap, size_t el_count) {
     while (heap->capacity < el_count)
         heap->capacity = (heap->capacity << 1) | 1;
-    heap->data = realloc(heap->data, heap->capacity * sizeof(void *));
+    heap->data = safe_realloc(heap->data, heap->capacity * sizeof(void *));
 }
 
 void heap_insert(Heap *heap, void *element) {
@@ -50,7 +52,7 @@ void heap_insert(Heap *heap, void *element) {
 
     // insert into the last position
     size_t i = heap->n_elements;
-    heap->data[i] = malloc(heap->element_size);
+    heap->data[i] = safe_malloc(heap->element_size);
     memcpy(heap->data[i], element, heap->element_size);
     heap->n_elements++;
 

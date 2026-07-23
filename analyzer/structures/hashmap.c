@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "utils/memory.h"
+
 HashMap *hashmap_new(
     size_t key_size,
     size_t value_size,
@@ -11,9 +13,9 @@ HashMap *hashmap_new(
     void (*key_cleanup)(void *key),
     void (*value_cleanup)(void *key)
 ) {
-    HashMap *map = malloc(sizeof(HashMap));
+    HashMap *map = safe_malloc(sizeof(HashMap));
     // initialize NULLs
-    memset(map->table, 0, sizeof(HashMapNode *) * HASHMAP_TABLE_SIZE);
+    memset(map->table, 0, HASHMAP_TABLE_SIZE * sizeof(HashMapNode *));
     map->key_size = key_size;
     map->value_size = value_size;
     map->hash = hash;
@@ -42,9 +44,9 @@ void hashmap_put(HashMap *map, void *key, void *value) {
     }
 
     // if it doesn't exist - create new node
-    HashMapNode *new_node = malloc(sizeof(HashMapNode));
-    new_node->key = malloc(map->key_size);
-    new_node->value = malloc(map->value_size);
+    HashMapNode *new_node = safe_malloc(sizeof(HashMapNode));
+    new_node->key = safe_malloc(map->key_size);
+    new_node->value = safe_malloc(map->value_size);
     memcpy(new_node->key, key, map->key_size);
     memcpy(new_node->value, value, map->value_size);
 
