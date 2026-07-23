@@ -43,9 +43,8 @@ int print_help(int argc, char *argv[]) {
             strcat(buffer, cmd.args_str);
 
         printf(INDENT "%-*s- %s\n", len, buffer, cmd.explanation[0]);
-        for (size_t j = 1; j < cmd.explanation_lines; j++) {
+        for (size_t j = 1; j < cmd.explanation_lines; j++)
             printf(INDENT "%*s%s\n", len + 2, "", cmd.explanation[j]);
-        }
     }
 
     return 0;
