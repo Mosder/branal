@@ -80,7 +80,7 @@ void create_c(char *path, char *h_path, char *from, char *to, char from_to_array
     fprintf(fp, "const char *get_%s_from_%s(int %s) {\n", to, from, from);
     fprintf(fp, "    if (%s >= 0 && %s < %s)\n", from, from, arr_len_name);
     fprintf(fp, "        return %s[%s];\n", arr_name, from);
-    fprintf(fp, "    printf(\"%s = %%d is outside of table range [0; %%d]\\n\", %s, %s - 1);\n", from, from, arr_len_name);
+    fprintf(fp, "    fprintf(stderr, \"%s = %%d is outside of table range [0; %%d]\\n\", %s, %s - 1);\n", from, from, arr_len_name);
     fprintf(fp, "    return \"null\";\n");
     fprintf(fp, "}");
 

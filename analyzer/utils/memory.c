@@ -11,12 +11,12 @@ void *safe_malloc(size_t size) {
         if (p)
             return p;
         if (i < MAX_ALLOC_ATTEMPTS - 1) {
-            printf("Failed malloc. Retrying in 1s...\n");
+            fprintf(stderr, "Failed malloc. Retrying in 1s...\n");
             sleep(1);
         }
     }
 
-    printf("ERROR: Failed malloc %d times. Exiting...", MAX_ALLOC_ATTEMPTS);
+    fprintf(stderr, "FATAL: Failed malloc %d times. Exiting...", MAX_ALLOC_ATTEMPTS);
     exit(EXIT_FAILURE);
 }
 
@@ -29,12 +29,12 @@ void *safe_realloc(void *ptr, size_t size) {
         if (p)
             return p;
         if (i < MAX_ALLOC_ATTEMPTS - 1) {
-            printf("Failed realloc. Retrying in 1s...\n");
+            fprintf(stderr, "Failed realloc. Retrying in 1s...\n");
             sleep(1);
         }
     }
 
-    printf("ERROR: Failed realloc %d times. Exiting...", MAX_ALLOC_ATTEMPTS);
+    fprintf(stderr, "FATAL: Failed realloc %d times. Exiting...", MAX_ALLOC_ATTEMPTS);
     exit(EXIT_FAILURE);
 }
 

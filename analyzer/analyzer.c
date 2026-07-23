@@ -59,7 +59,7 @@ void analyze_file(char *path) {
 
     // handle errors
     if (handle == NULL) {
-        printf("Couldn't open the specified file:\n%s\n", errbuf);
+        fprintf(stderr, "Couldn't open the specified file:\n%s\n", errbuf);
         return;
     }
 
