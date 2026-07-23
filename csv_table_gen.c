@@ -59,8 +59,9 @@ void create_c(char *path, char *h_path, char *from, char *to, char from_to_array
     sprintf(arr_name, "%s_to_%s", from, to);
     sprintf(arr_len_name, "%s_to_%s_len", from, to);
 
-    // write include and beginning of array
+    // write includes and the beginning of array
     fprintf(fp, "#include \"%s\"\n\n", strstr(h_path, CSV_PATH));
+    fprintf(fp, "#include <stdio.h>\n\n");
     fprintf(fp, "static const char *%s[] = {\n", arr_name);
 
     // write values
@@ -77,7 +78,10 @@ void create_c(char *path, char *h_path, char *from, char *to, char from_to_array
 
     // write the getter
     fprintf(fp, "const char *get_%s_from_%s(int %s) {\n", to, from, from);
-    fprintf(fp, "    return %s >= 0 && %s < %s ? %s[%s] : \"null\";\n", from, from, arr_len_name, arr_name, from);
+    fprintf(fp, "    if (%s >= 0 && %s < %s)\n", from, from, arr_len_name);
+    fprintf(fp, "        return %s[%s];\n", arr_name, from);
+    fprintf(fp, "    printf(\"%s = %%d is outside of table range [0; %%d]\\n\", %s, %s - 1);\n", from, from, arr_len_name);
+    fprintf(fp, "    return \"null\";\n");
     fprintf(fp, "}");
 
     fclose(fp);
