@@ -10,15 +10,21 @@ local: compile
 debug: CFLAGS=-iquote ./analyzer -Og -g
 debug: global
 
-compile: csv structures utils parser capture analyzer render
+compile: csv_table_gen main_files structures utils parser
 	$(CC) $(CFLAGS) -lpcap *.o main.c -o branal
 	rm *.o
 
-csv:
-	$(CC) $(CFLAGS) csv_to_headers.c -o csv_to_headers
-	./csv_to_headers
-	rm csv_to_headers
+csv_table_gen:
+	$(CC) $(CFLAGS) csv_table_gen.c -o csv_table_gen
+	./csv_table_gen
+	rm csv_table_gen
 	$(CC) $(CFLAGS) -c analyzer/csv/*.c
+
+main_files:
+	$(CC) $(CFLAGS) -c analyzer/commands.c
+	$(CC) $(CFLAGS) -c analyzer/capture.c
+	$(CC) $(CFLAGS) -c analyzer/analyzer.c
+	$(CC) $(CFLAGS) -c analyzer/render.c
 
 structures:
 	$(CC) $(CFLAGS) -c analyzer/structures/hashmap.c
@@ -35,15 +41,3 @@ parser:
 	$(CC) $(CFLAGS) -c analyzer/parser/parser.c
 	$(CC) $(CFLAGS) -c analyzer/parser/structs.c
 	$(CC) $(CFLAGS) -c analyzer/parser/fight_results/fight_results.c
-
-capture:
-	$(CC) $(CFLAGS) -c analyzer/capture.c
-
-analyzer:
-	$(CC) $(CFLAGS) -c analyzer/analyzer.c
-
-render:
-	$(CC) $(CFLAGS) -c analyzer/render.c
-
-.PHONY: analyzer
-.PHONY: csv

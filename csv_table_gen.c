@@ -112,7 +112,7 @@ int main() {
         char *file_name = entry->d_name;
         size_t file_name_len = strlen(file_name);
         // create lookup tables for each *.csv file
-        if (file_name_len > EXT_LEN && strcmp(file_name + file_name_len - EXT_LEN, EXT) == 0)
+        if (file_name_len > EXT_LEN && !strcmp(file_name + file_name_len - EXT_LEN, EXT))
             create_table(entry->d_name);
     }
     closedir(csv_dir);
