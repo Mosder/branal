@@ -6,10 +6,11 @@ Unless you value FOSS or have troubles setting up BrokenHUD on your linux system
 
 ## Features
 - Capturing packets sent by the game and saving them to a file for later use
-
-### Planned features
 - Analyzer for the `.pcap` files containing captured packets:
   - List of fight results in the given file with rewards gained for each player
+
+### Planned features
+- File analysis:
   - Total gained rewards in all fights in the given file
 - Live analyzer parsing packets in real time:
   - Results of the last fight
@@ -80,20 +81,20 @@ branal (l | live)
 ```
 It will open the live analyzer in your terminal.
 
-### File analyzer (NOT IMPLEMENTED)
-To analize a `.pcap` file, use:
+### File analyzer
+To analize `.pcap` files, use:
 ```
-branal (f | file) <file>
+branal (f | file) <file...>
 ```
-It will perform analysis of the specified `<file>`.
+It will perform analysis of the specified file(s).
 
 ### Capturing packets
 To just capture packets from the server, use:
 ```
 branal (c | capture) [file]
 ```
-It will start capturing packets to the specified `[file]`.  
-If `[file]` is not specified, it will capture them to the default location (`~/.local/share/branal/captures`).
+It will start capturing packets to the specified file.  
+If file is not specified, it will capture them to the default location (`~/.local/share/branal/captures`).
 
 ### Help
 You can display help using:
