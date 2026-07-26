@@ -28,6 +28,9 @@ int longest_command_length() {
 
 // help command handler
 int print_help(int argc, char *argv[]) {
+    (void)argc;
+    (void)argv;
+
     int len = longest_command_length();
 
     printf("A bare-bones analyzer for the game Broken Ranks\n");
@@ -52,6 +55,9 @@ int print_help(int argc, char *argv[]) {
 
 // live analyzer command handler
 int live_anal(int argc, char *argv[]) {
+    (void)argc;
+    (void)argv;
+
     // TODO: implement
     printf("Not implemented\n");
     return 1;
@@ -70,7 +76,7 @@ int file_anal(int argc, char *argv[]) {
         return 1;
     }
 
-    for (size_t i = 2; i < argc; i++) {
+    for (size_t i = 2; i < (size_t)argc; i++) {
         printf("FILE: %s\n", argv[i]);
         analyze_file(argv[i]);
         printf("\n");

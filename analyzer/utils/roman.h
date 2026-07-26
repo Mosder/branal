@@ -2,7 +2,7 @@
 // functions for roman numbers
 
 typedef struct {
-    int num;
+    unsigned int num;
     char *symbol;
 } RomanSymbol;
 
@@ -26,4 +26,4 @@ static const RomanSymbol roman_symbols[] = {
 // params:
 //      buffer - buffer to save the roman number to
 //      number - arabic number to convert
-extern void to_roman(char *buffer, int number);
+extern void to_roman(char *buffer, unsigned int number);

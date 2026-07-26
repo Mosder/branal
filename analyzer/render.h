@@ -38,7 +38,7 @@ static const ColumnInfo columns[] = {
     {"Saturation", 13, COLOR_GREEN},
     {"Splinters", 9, COLOR_BLUE},
 };
-static const inline size_t sum_col_widths() {
+inline static size_t sum_col_widths() {
     size_t sum = 0;
     for (size_t i = 0; i < ARR_LEN(columns); i++)
         sum += columns[i].width;

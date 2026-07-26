@@ -39,7 +39,7 @@ byte_t *find_fight_results(TCPStream *stream, int offset, int *length) {
     byte_t *end = NULL;
     if (start)
         end = memmem(start, stream->len - (start - stream->data), FIGHT_RESULTS_END, strlen(FIGHT_RESULTS_END));
-    *length = end ? end - start + strlen(FIGHT_RESULTS_END) : -1;
+    *length = end ? (int)(end - start + strlen(FIGHT_RESULTS_END)) : -1;
     return start;
 }
 
@@ -55,7 +55,7 @@ void add_gear(FriendlyResults *results, size_t *items_capacity, char *gears_str)
     char *gears_separator;
     do {
         gears_separator = strstr(gears_str, SEPARATOR_GEAR);
-        size_t len = gears_separator ? gears_separator - gears_str : strlen(gears_str);
+        size_t len = gears_separator ? (size_t)(gears_separator - gears_str) : strlen(gears_str);
         Gear gear = {0};
         fill_struct(&gear, gear_fields, ARR_LEN(gear_fields), gears_str, len, SEPARATOR_GEAR_FIELD);
 
@@ -135,7 +135,7 @@ void add_drifs(FriendlyResults *results, size_t *items_capacity, char *drifs_str
     char *drifs_separator;
     do {
         drifs_separator = strstr(drifs_str, SEPARATOR_DRIF);
-        size_t len = drifs_separator ? drifs_separator - drifs_str : strlen(drifs_str);
+        size_t len = drifs_separator ? (size_t)(drifs_separator - drifs_str) : strlen(drifs_str);
         Drif drif = {0};
         fill_struct(&drif, drif_fields, ARR_LEN(drif_fields), drifs_str, len, SEPARATOR_DRIF_FIELD);
 
@@ -228,7 +228,7 @@ ParsedData parse_fight_results(byte_t *data, size_t length) {
     do {
         // get generic entity results
         entity_separator = memmem(data, length, SEPARATOR_ENTITY, strlen(SEPARATOR_ENTITY));
-        size_t len = entity_separator ? entity_separator - data : length;
+        size_t len = entity_separator ? (size_t)(entity_separator - data) : length;
         EntityResults entity_results = {0};
         fill_struct(&entity_results, entity_fields, ARR_LEN(entity_fields), (char *)data, len, SEPARATOR_ENTITY_FIELD);
 
