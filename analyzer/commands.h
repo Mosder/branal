@@ -27,4 +27,6 @@ extern const size_t commands_count;
 extern int is_command(Command command, char *str);
 
 // print information about help when program didn't recognize command
-extern void command_not_recognized();
+// params:
+//      - prog_name - name of the program (argv[0])
+extern void command_not_recognized(const char *prog_name);

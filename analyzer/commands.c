@@ -7,16 +7,15 @@
 #include "capture.h"
 #include "utils/memory.h"
 
-#define PROGRAM_NAME "branal"
 #define INDENT "  "
 #define MAX_COMMAND_LENGTH 100
 
 // calculate the longest command length to align explenations
-int longest_command_length() {
+int longest_command_length(const char *prog_name) {
     int longest_len = 0;
     for (size_t i = 0; i < commands_count; i++) {
         Command cmd = commands[i];
-        int len = strlen(PROGRAM_NAME);
+        int len = strlen(prog_name);
         len += strlen(" ( | ) ");
         len += strlen(cmd.short_name) + strlen(cmd.name);
         len += strlen(cmd.args_str) == 0 ? 0 : strlen(cmd.args_str) + 1;
@@ -29,19 +28,18 @@ int longest_command_length() {
 // help command handler
 int print_help(int argc, char *argv[]) {
     (void)argc;
-    (void)argv;
 
-    int len = longest_command_length();
+    int len = longest_command_length(argv[0]);
 
     printf("A bare-bones analyzer for the game Broken Ranks\n");
     printf("\nUsage:\n");
-    printf(INDENT "%-*s- same as below\n", len, PROGRAM_NAME);
+    printf(INDENT "%-*s- same as below\n", len, argv[0]);
 
     for (size_t i = 0; i < commands_count; i++) {
         Command cmd = commands[i];
 
         char buffer[MAX_COMMAND_LENGTH];
-        sprintf(buffer, PROGRAM_NAME " (%s | %s) ", cmd.short_name, cmd.name);
+        sprintf(buffer, "%s (%s | %s) ", argv[0], cmd.short_name, cmd.name);
         if (strlen(cmd.args_str))
             strcat(buffer, cmd.args_str);
 
@@ -98,7 +96,7 @@ int is_command(Command command, char *str) {
     return !strcmp(command.short_name, str) || !strcmp(command.name, str);
 }
 
-void command_not_recognized() {
+void command_not_recognized(const char *prog_name) {
     printf("Command not recognized\n");
-    printf("Use \"%s (%s | %s)\" for help\n", PROGRAM_NAME, help_command.short_name, help_command.name);
+    printf("Use \"%s (%s | %s)\" for help\n", prog_name, help_command.short_name, help_command.name);
 }

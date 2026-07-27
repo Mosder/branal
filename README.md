@@ -51,7 +51,7 @@ echo "#define INTERFACE \"<interface>\"" > analyzer/headers/interface.h
 
 **4. Compile the code**:  
 Finally, compile the code with `make`.  
-To install it into `/usr/bin`:
+To install it into `/usr/local/bin`:
 ```
 make
 ```

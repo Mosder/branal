@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-Wall -Wextra -iquote ./analyzer -O2 -flto -s
 
 global: compile
-	sudo mv branal /usr/bin
+	sudo mv branal /usr/local/bin
 
 local: compile
 	mv branal ${HOME}/.local/bin

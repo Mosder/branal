@@ -13,6 +13,6 @@ int main(int argc, char *argv[]) {
             return commands[i].handler(argc, argv);
     }
 
-    command_not_recognized();
+    command_not_recognized(argv[0]);
     return 1;
 }
