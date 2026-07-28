@@ -18,12 +18,12 @@ typedef struct {
 
 // find the first results data of specific type in stream
 // params:
-//      - stream - stream to find the data in
-//      - offset - offset to start finding data from
+//      - bytes - stream bytes to find the data in
+//      - bytes_count - count of bytes in the stream
 //      - length - length of the data or -1 if there's no end yet
 // returns:
 //      pointer to the beginning of data or NULL if there's none
-typedef byte_t *find_function_t(TCPStream *stream, int offset, int *length);
+typedef byte_t *find_function_t(byte_t *bytes, size_t bytes_count, int *length);
 
 // parse given data of specifc type
 // params:

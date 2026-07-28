@@ -1,7 +1,6 @@
 #include "analyzer.h"
 
-#include <stdlib.h>
-#include <string.h>
+#include <stdio.h>
 
 #include "parser/parser.h"
 #include "render.h"
@@ -9,11 +8,7 @@
 
 // loop through packets received from pcap_handle and analyze the TCP streams
 void analyzer_loop(
-    TCPStream *server_stream,
-    TCPStream *client_stream,
-    pcap_t *pcap_handle,
-    void *state,
-    void (*parsed_data_handler)(void *state, ParsedData *parsed_data, size_t n_parsed_data)
+    TCPStream *server_stream, TCPStream *client_stream, pcap_t *pcap_handle, void *state, void (*parsed_data_handler)(void *state, DynArray parsed_data)
 ) {
     // read packets from handle
     struct pcap_pkthdr *packet_data;
@@ -30,31 +25,31 @@ void analyzer_loop(
         if (handle_segment(stream, segment)) {
             // if it was added to the stream - parse it
             size_t parsed_len;
-            size_t n_parsed_data;
-            ParsedData *parsed_data = parse_stream(stream, &parsed_len, &n_parsed_data);
+            DynArray parsed_data = parse_stream(stream, &parsed_len);
 
             // if some bytes were parsed - remove them from the stream
             if (parsed_len > 0)
                 remove_parsed_data(stream, parsed_len);
 
             // if there's parsed data - call the parsed data handler
-            if (n_parsed_data > 0)
-                parsed_data_handler(state, parsed_data, n_parsed_data);
+            if (parsed_data.count > 0)
+                parsed_data_handler(state, parsed_data);
 
-            // free the entire parsed data memory
-            free_parsed_data(parsed_data, n_parsed_data);
+            // destroy parsed data
+            array_destroy(parsed_data);
         }
     }
 }
 
 // file analyzer parsed data handler
-void file_parsed_data_handler(void *state, ParsedData *parsed_data, size_t n_parsed_data) {
+void file_parsed_data_handler(void *state, DynArray parsed_data) {
     int *fights_count = state;
-    for (size_t i = 0; i < n_parsed_data; i++) {
-        switch (parsed_data[i].data_type) {
+    ParsedData *data = NULL;
+    while ((data = array_next(parsed_data, data))) {
+        switch (data->data_type) {
             case TYPE_FIGHT_RESULTS:
                 printf("\nFIGHT %d:\n", ++*fights_count);
-                render_fight_results(*(FightResults *)parsed_data[i].data);
+                render_fight_results(*(FightResults *)data->data);
                 break;
         }
     }

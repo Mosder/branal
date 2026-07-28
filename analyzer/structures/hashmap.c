@@ -7,25 +7,25 @@
 
 HashMap *hashmap_new(
     size_t key_size,
-    size_t value_size,
+    size_t val_size,
     size_t (*hash)(void *key),
     int (*compare)(void *key1, void *key2),
     void (*key_cleanup)(void *key),
-    void (*value_cleanup)(void *key)
+    void (*val_cleanup)(void *val)
 ) {
     HashMap *map = safe_malloc(sizeof(HashMap));
     // initialize NULLs
     memset(map->table, 0, HASHMAP_TABLE_SIZE * sizeof(HashMapNode *));
     map->key_size = key_size;
-    map->value_size = value_size;
+    map->val_size = val_size;
     map->hash = hash;
     map->compare = compare;
     map->key_cleanup = key_cleanup;
-    map->value_cleanup = value_cleanup;
+    map->val_cleanup = val_cleanup;
     return map;
 }
 
-void hashmap_put(HashMap *map, void *key, void *value) {
+void hashmap_put(HashMap *map, void *key, void *val) {
     size_t key_hash = map->hash(key);
     HashMapNode *node = map->table[key_hash];
 
@@ -34,10 +34,10 @@ void hashmap_put(HashMap *map, void *key, void *value) {
         // if it exists - update node
         if (map->compare(key, node->key)) {
             // ensure no hanging memory allocation
-            if (map->value_cleanup) {
-                map->value_cleanup(node->value);
+            if (map->val_cleanup) {
+                map->val_cleanup(node->val);
             }
-            memcpy(node->value, value, map->value_size);
+            memcpy(node->val, val, map->val_size);
             return;
         }
         node = node->next;
@@ -46,9 +46,9 @@ void hashmap_put(HashMap *map, void *key, void *value) {
     // if it doesn't exist - create new node
     HashMapNode *new_node = safe_malloc(sizeof(HashMapNode));
     new_node->key = safe_malloc(map->key_size);
-    new_node->value = safe_malloc(map->value_size);
+    new_node->val = safe_malloc(map->val_size);
     memcpy(new_node->key, key, map->key_size);
-    memcpy(new_node->value, value, map->value_size);
+    memcpy(new_node->val, val, map->val_size);
 
     // put in front of the linked list
     new_node->next = map->table[key_hash];
@@ -63,7 +63,7 @@ void *hashmap_get(HashMap *map, void *key) {
     while (node) {
         // if it exists - return the value pointer
         if (map->compare(key, node->key)) {
-            return node->value;
+            return node->val;
         }
         node = node->next;
     }
@@ -76,11 +76,11 @@ void free_node_without_next(HashMap *map, HashMapNode *node) {
     if (map->key_cleanup) {
         map->key_cleanup(node->key);
     }
-    if (map->value_cleanup) {
-        map->value_cleanup(node->value);
+    if (map->val_cleanup) {
+        map->val_cleanup(node->val);
     }
     free(node->key);
-    free(node->value);
+    free(node->val);
     free(node);
 }
 

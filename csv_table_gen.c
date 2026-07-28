@@ -1,4 +1,5 @@
 #include <dirent.h>
+#include <limits.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -89,19 +90,19 @@ void create_c(char *path, char *h_path, char *from, char *to, char from_to_array
 
 void create_table(char *file_name) {
     // read from input file
-    char input_path[BUFFER_SIZE];
+    char input_path[PATH_MAX];
     sprintf(input_path, "%s/%s", CSV_PATH, file_name);
     char from[BUFFER_SIZE], to[BUFFER_SIZE];
     char from_to_array[MAX_ARR_SIZE][BUFFER_SIZE] = {0};
     size_t max_index = read_csv(input_path, from, to, from_to_array);
 
     // create output .h file
-    char h_path[BUFFER_SIZE];
+    char h_path[PATH_MAX];
     sprintf(h_path, "%s/%s_to_%s.h", OUT_PATH, from, to);
     create_h(h_path, from, to);
 
     // create output .c file
-    char c_path[BUFFER_SIZE];
+    char c_path[PATH_MAX];
     sprintf(c_path, "%s/%s_to_%s.c", OUT_PATH, from, to);
     create_c(c_path, h_path, from, to, from_to_array, max_index);
 }

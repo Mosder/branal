@@ -5,14 +5,14 @@
 
 #include "utils/memory.h"
 
-Heap *heap_new(size_t element_size, int (*compare)(void *element1, void *element2), void (*element_cleanup)(void *element)) {
+Heap *heap_new(size_t el_size, int (*compare)(void *el1, void *el2), void (*el_cleanup)(void *el)) {
     Heap *heap = safe_malloc(sizeof(Heap));
-    heap->data = safe_malloc(INIT_HEAP_CAPACITY * sizeof(void *));
-    heap->n_elements = 0;
-    heap->element_size = element_size;
+    heap->data = safe_malloc(INIT_HEAP_CAPACITY * el_size);
+    heap->count = 0;
+    heap->el_size = el_size;
     heap->capacity = INIT_HEAP_CAPACITY;
     heap->compare = compare;
-    heap->element_cleanup = element_cleanup;
+    heap->el_cleanup = el_cleanup;
     return heap;
 }
 
@@ -31,56 +31,50 @@ size_t right(size_t i) {
     return 2 * i + 2;
 }
 
-// swap two elements
-void swap(void **p_el1, void **p_el2) {
-    void *tmp = *p_el1;
-    *p_el1 = *p_el2;
-    *p_el2 = tmp;
+// swap two elements in heap
+void swap(Heap *heap, size_t i1, size_t i2) {
+    char tmp[heap->el_size];
+    memcpy(tmp, heap->data + i1, heap->el_size);
+    memcpy(heap->data + i1, heap->data + i2, heap->el_size);
+    memcpy(heap->data + i2, tmp, heap->el_size);
 }
 
 // expand heap exponentially to fit el_count elements
 void expand_heap(Heap *heap, size_t el_count) {
     while (heap->capacity < el_count)
         heap->capacity = (heap->capacity << 1) | 1;
-    heap->data = safe_realloc(heap->data, heap->capacity * sizeof(void *));
+    heap->data = safe_realloc(heap->data, heap->capacity * heap->el_size);
 }
 
 void heap_insert(Heap *heap, void *element) {
     // expand heap if capacity is too small
-    if (heap->n_elements >= heap->capacity)
-        expand_heap(heap, heap->n_elements + 1);
+    if (heap->count >= heap->capacity)
+        expand_heap(heap, heap->count + 1);
 
     // insert into the last position
-    size_t i = heap->n_elements;
-    heap->data[i] = safe_malloc(heap->element_size);
-    memcpy(heap->data[i], element, heap->element_size);
-    heap->n_elements++;
+    size_t i = heap->count++;
+    memcpy(heap->data + i, element, heap->count);
 
     // heapify up
-    while (i > 0 && heap->compare(heap->data[i], heap->data[parent(i)])) {
-        swap(&heap->data[i], &heap->data[parent(i)]);
+    while (i > 0 && heap->compare(heap->data + i, heap->data + parent(i))) {
+        swap(heap, i, parent(i));
         i = parent(i);
     }
 }
 
 void *heap_top_get(Heap *heap) {
-    return heap->n_elements <= 0 ? NULL : heap->data[0];
-}
-
-void free_heap_element(Heap *heap, size_t index) {
-    if (heap->element_cleanup)
-        heap->element_cleanup(heap->data[index]);
-    free(heap->data[index]);
+    return heap->count <= 0 ? NULL : heap->data;
 }
 
 void heap_top_remove(Heap *heap) {
-    if (heap->n_elements <= 0)
+    if (heap->count <= 0)
         return;
 
-    free_heap_element(heap, 0);
+    if (heap->el_cleanup)
+        heap->el_cleanup(heap->data);
 
     // move last element to root
-    heap->data[0] = heap->data[--heap->n_elements];
+    memcpy(heap->data, heap->data + --heap->count, heap->el_size);
 
     // heapify down
     size_t i = 0;
@@ -88,16 +82,16 @@ void heap_top_remove(Heap *heap) {
     do {
         size_t l = left(i);
         size_t r = right(i);
-        size_t to_be_parent = i;
+        size_t new_par = i;
 
-        if (l < heap->n_elements && heap->compare(heap->data[l], heap->data[to_be_parent]))
-            to_be_parent = l;
-        if (r < heap->n_elements && heap->compare(heap->data[r], heap->data[to_be_parent]))
-            to_be_parent = r;
+        if (l < heap->count && heap->compare(heap->data + l, heap->data + new_par))
+            new_par = l;
+        if (r < heap->count && heap->compare(heap->data + r, heap->data + new_par))
+            new_par = r;
 
-        if ((changed = to_be_parent != i)) {
-            swap(&heap->data[to_be_parent], &heap->data[i]);
-            i = to_be_parent;
+        if ((changed = new_par != i)) {
+            swap(heap, new_par, i);
+            i = new_par;
         }
     } while (changed);
 }
@@ -105,8 +99,9 @@ void heap_top_remove(Heap *heap) {
 void heap_free(Heap *heap) {
     if (!heap)
         return;
-    for (size_t i = 0; i < heap->n_elements; i++) {
-        free_heap_element(heap, i);
+    if (heap->el_cleanup) {
+        for (size_t i = 0; i < heap->count; i++)
+            heap->el_cleanup(heap->data + i);
     }
     free(heap->data);
     free(heap);

@@ -2,7 +2,7 @@
 // utilities for parsing the fight results data
 
 #include "parser/parser_defs.h"
-#include "utils/tcp.h"
+#include "structures/array.h"
 
 #ifndef FIGHT_RESULTS_H
 #define FIGHT_RESULTS_H
@@ -29,8 +29,7 @@ typedef struct {
     char *name;
     int exp;
     int gold;
-    Item *items;
-    size_t num_items;
+    DynArray items;
     int level;
     int psycho;
     int splinters;
@@ -48,10 +47,8 @@ typedef struct {
 
 // entire fight resutls
 typedef struct {
-    size_t num_friendly;
-    FriendlyResults *friendly_results;
-    size_t num_enemy;
-    EnemyResults *enemy_results;
+    DynArray friendly_results;
+    DynArray enemy_results;
 } FightResults;
 
 extern find_function_t find_fight_results;

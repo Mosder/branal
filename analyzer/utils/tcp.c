@@ -77,9 +77,7 @@ TCPSegment get_segment_from_packet(const byte_t *packet, const struct pcap_pkthd
 TCPStream new_stream(ConnectionSource src) {
     // clang-format off
     TCPStream stream = {
-        .data = safe_malloc(INIT_STREAM_CAPACITY),
-        .len = 0,
-        .capacity = INIT_STREAM_CAPACITY,
+        .bytes = array_new(1, INIT_STREAM_CAPACITY, NULL),
         .seq = 0,
         .port = 0,
         .src = src,
@@ -90,13 +88,12 @@ TCPStream new_stream(ConnectionSource src) {
 }
 
 void destroy_stream(TCPStream stream) {
-    free(stream.data);
+    array_destroy(stream.bytes);
     heap_free(stream.pending);
 }
 
 void remove_parsed_data(TCPStream *stream, size_t parsed_len) {
-    memmove(stream->data, stream->data + parsed_len, stream->len - parsed_len);
-    stream->len -= parsed_len;
+    array_remove_front(&stream->bytes, parsed_len);
     stream->seq += parsed_len;
 }
 
@@ -104,7 +101,7 @@ void remove_parsed_data(TCPStream *stream, size_t parsed_len) {
 // return the index of the first relevant byte in payload or -1 if segment isn't directly connected to stream
 int get_first_relevant_byte_index(TCPStream stream, TCPSegment segment) {
     // expected tcp sequence numbers for stream and segment
-    uint32_t stream_expected = stream.seq + stream.len;
+    uint32_t stream_expected = stream.seq + stream.bytes.count;
     uint32_t segment_expected = segment.seq + segment.len;
     if (seq_in_range_ie(stream_expected, segment.seq, segment_expected))
         return stream_expected - segment.seq;
@@ -114,14 +111,9 @@ int get_first_relevant_byte_index(TCPStream stream, TCPSegment segment) {
 // check if the segment is in acceptable range to the stream
 int in_acceptable_range(TCPStream stream, TCPSegment segment) {
     // expected tcp sequence number for stream and max acceptable sequence number for segment
-    uint32_t stream_expected = stream.seq + stream.len;
+    uint32_t stream_expected = stream.seq + stream.bytes.count;
     uint32_t max_acceptable_seq = stream_expected + MAX_SEQ_OFFSET;
     return seq_in_range_ei(segment.seq, stream_expected, max_acceptable_seq);
-}
-
-// add segment directly to stream
-void add_segment(TCPStream *stream, TCPSegment segment, size_t data_start) {
-    stream->data = array_concat(stream->data, 1, &stream->len, &stream->capacity, segment.payload + data_start, segment.len - data_start);
 }
 
 // add pending segments to the stream
@@ -134,7 +126,7 @@ void add_pending_segments(TCPStream *stream) {
         // add pending segment it it became directly connected
         int data_start = get_first_relevant_byte_index(*stream, *top);
         if (data_start != -1) {
-            add_segment(stream, *top, data_start);
+            array_concat(&stream->bytes, top->payload + data_start, top->len - data_start);
             top_changed = 1;
         }
 
@@ -152,11 +144,11 @@ int handle_segment(TCPStream *stream, TCPSegment segment) {
         heap_free(stream->pending);
         stream->pending = heap_new(sizeof(TCPSegment), segments_compare, segment_cleanup);
 
-        stream->len = 0;
+        array_remove_front(&stream->bytes, stream->bytes.count);
         stream->seq = segment.seq;
         stream->port = segment.port;
 
-        add_segment(stream, segment, 0);
+        array_concat(&stream->bytes, segment.payload, segment.len);
         free(segment.payload);
         return 1;
     }
@@ -164,7 +156,7 @@ int handle_segment(TCPStream *stream, TCPSegment segment) {
     // add segment directly to the stream if it's directly connected
     int data_start = get_first_relevant_byte_index(*stream, segment);
     if (data_start != -1) {
-        add_segment(stream, segment, data_start);
+        array_concat(&stream->bytes, segment.payload + data_start, segment.len - data_start);
         free(segment.payload);
         add_pending_segments(stream);
         return 1;

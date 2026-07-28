@@ -10,36 +10,36 @@
 #define INIT_HEAP_CAPACITY (1 << INIT_HEAP_DEPTH) - 1
 
 typedef struct {
-    void **data;
-    size_t n_elements;
-    size_t element_size;
+    void *data;
+    size_t count;
+    size_t el_size;
     size_t capacity;
-    int (*compare)(void *element1, void *element2);
-    void (*element_cleanup)(void *element);
+    int (*compare)(void *el1, void *el2);
+    void (*el_cleanup)(void *el);
 } Heap;
 
 // create a new heap
 // params:
-//      - element_size - size of the heap element
+//      - el_size - size of the heap element
 //      - compare - function for comparing elements
 //        params:
-//             - element1 - pointer to the first of the elements to compare
-//             - element2 - pointer to the second of the elements to compare
+//             - el1 - pointer to the first of the elements to compare
+//             - el2 - pointer to the second of the elements to compare
 //        returns:
-//             truthy if element1 should be element2's parent (e.g. element1 > element2 for max heap), falsy otherwise
-//      - element_cleanup - function for cleaning up any internal allocations inside element (not the element itself)
-//                          if it has no heap allocations, this should be NULL
+//             truthy if el1 should be el2's parent (e.g. el1 > el2 for max heap), falsy otherwise
+//      - el_cleanup - function for cleaning up any internal allocations inside element (not the element itself)
+//                     if it has no heap allocations, this should be NULL
 //        params:
-//             - element - pointer to the element to cleanup
+//             - el - pointer to the element to cleanup
 // returns:
 //      pointer to the new heap
-extern Heap *heap_new(size_t element_size, int (*compare)(void *element1, void *element2), void (*element_cleanup)(void *element));
+extern Heap *heap_new(size_t el_size, int (*compare)(void *el1, void *el2), void (*el_cleanup)(void *el));
 
 // insert new element into the heap
 // params:
 //      - heap - heap to insert to
-//      - element - pointer to the element to insert
-extern void heap_insert(Heap *heap, void *element);
+//      - el - pointer to the element to insert
+extern void heap_insert(Heap *heap, void *el);
 
 // get the top element from the heap
 // params:

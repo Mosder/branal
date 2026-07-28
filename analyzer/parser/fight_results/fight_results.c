@@ -13,32 +13,40 @@
 #include "parser/fight_results/gear.h"
 #include "parser/fight_results/gear_info.h"
 #include "parser/fight_results/orb.h"
-#include "parser/structs.h"
 #include "utils/memory.h"
 #include "utils/roman.h"
 
 // function to cleanup fight results to be used in ParsedData struct
 void cleanup_fight_results(void *data) {
     FightResults *fight_results = data;
-    for (size_t i = 0; i < fight_results->num_friendly; i++) {
-        FriendlyResults friendly = fight_results->friendly_results[i];
-        free(friendly.name);
-        for (size_t j = 0; j < friendly.num_items; j++)
-            free(friendly.items[j].data);
-        free(friendly.items);
-    }
-    for (size_t i = 0; i < fight_results->num_enemy; i++) {
-        free(fight_results->enemy_results[i].name);
-    }
-    free(fight_results->friendly_results);
-    free(fight_results->enemy_results);
+    array_destroy(fight_results->friendly_results);
+    array_destroy(fight_results->enemy_results);
 }
 
-byte_t *find_fight_results(TCPStream *stream, int offset, int *length) {
-    byte_t *start = memmem(stream->data + offset, stream->len - offset, FIGHT_RESULTS_START, strlen(FIGHT_RESULTS_START));
+// function to cleanup FriendlyResults in DynArray
+void cleanup_friendly_results(void *results) {
+    FriendlyResults *friendly = results;
+    free(friendly->name);
+    array_destroy(friendly->items);
+}
+
+// function to cleanup EnemyResults in DynArray
+void cleanup_enemy_results(void *results) {
+    EnemyResults *enemy = results;
+    free(enemy->name);
+}
+
+// function to cleanup Item in DynArray
+void cleanup_item(void *item) {
+    Item *it = item;
+    free(it->data);
+}
+
+byte_t *find_fight_results(byte_t *bytes, size_t bytes_count, int *length) {
+    byte_t *start = memmem(bytes, bytes_count, FIGHT_RESULTS_START, strlen(FIGHT_RESULTS_START));
     byte_t *end = NULL;
     if (start)
-        end = memmem(start, stream->len - (start - stream->data), FIGHT_RESULTS_END, strlen(FIGHT_RESULTS_END));
+        end = memmem(start, bytes_count - (start - bytes), FIGHT_RESULTS_END, strlen(FIGHT_RESULTS_END));
     *length = end ? (int)(end - start + strlen(FIGHT_RESULTS_END)) : -1;
     return start;
 }
@@ -48,7 +56,7 @@ void get_stars(char *buffer, int incr_above_b1) {
     sprintf(buffer, " (%c%d)", star_types[incr_above_b1 / 3], incr_above_b1 % 3 + 1);
 }
 
-void add_gear(FriendlyResults *results, size_t *items_capacity, char *gears_str) {
+void add_gear(DynArray *items, char *gears_str) {
     if (strlen(gears_str) == 0)
         return;
 
@@ -106,7 +114,7 @@ void add_gear(FriendlyResults *results, size_t *items_capacity, char *gears_str)
                 item.type = EPIC;
                 break;
         }
-        results->items = array_append(results->items, sizeof(Item), &results->num_items, items_capacity, &item);
+        array_append(items, &item);
 
         cleanup_struct(&gear_info, gear_info_fields, ARR_LEN(gear_info_fields));
 
@@ -119,7 +127,7 @@ void add_gear(FriendlyResults *results, size_t *items_capacity, char *gears_str)
             sprintf(buffer, "%sorb %s", get_artifact_size_from_id(orb.size), get_orb_name_from_id(orb.id));
 
             Item item = {.data = strdup(buffer), .type = ORB};
-            results->items = array_append(results->items, sizeof(Item), &results->num_items, items_capacity, &item);
+            array_append(items, &item);
 
             cleanup_struct(&orb, orb_fields, ARR_LEN(orb_fields));
         }
@@ -128,7 +136,7 @@ void add_gear(FriendlyResults *results, size_t *items_capacity, char *gears_str)
     } while (gears_separator);
 }
 
-void add_drifs(FriendlyResults *results, size_t *items_capacity, char *drifs_str) {
+void add_drifs(DynArray *items, char *drifs_str) {
     if (strlen(drifs_str) == 0)
         return;
 
@@ -144,13 +152,13 @@ void add_drifs(FriendlyResults *results, size_t *items_capacity, char *drifs_str
             drifs_str = drifs_separator + strlen(SEPARATOR_DRIF);
 
         Item item = {.data = strdup(drif.name), .type = DRIF};
-        results->items = array_append(results->items, sizeof(Item), &results->num_items, items_capacity, &item);
+        array_append(items, &item);
 
         cleanup_struct(&drif, drif_fields, ARR_LEN(drif_fields));
     } while (drifs_separator);
 }
 
-void add_items(FriendlyResults *results, size_t *items_capacity, char *items_str) {
+void add_items(DynArray *items, char *items_str) {
     if (strlen(items_str) == 0)
         return;
 
@@ -168,7 +176,7 @@ void add_items(FriendlyResults *results, size_t *items_capacity, char *items_str
             items_str = items_separator + strlen(SEPARATOR_ITEMS);
 
         Item item = {.data = strdup(buffer), .type = NORMAL};
-        results->items = array_append(results->items, sizeof(Item), &results->num_items, items_capacity, &item);
+        array_append(items, &item);
     } while (items_separator);
 }
 
@@ -181,16 +189,14 @@ FriendlyResults parse_to_friendly(EntityResults entity_results) {
         .level = entity_results.level,
         .psycho = entity_results.psycho,
         .splinters = entity_results.splinters,
-        .num_items = 0,
         .saturation = 0
     };
 
     // create items array and add to it gear, drifs and items
-    results.items = safe_malloc(INIT_ITEMS_CAPACITY * sizeof(Item));
-    size_t items_cap = INIT_ITEMS_CAPACITY;
-    add_gear(&results, &items_cap, entity_results.gear);
-    add_drifs(&results, &items_cap, entity_results.drifs);
-    add_items(&results, &items_cap, entity_results.items);
+    results.items = array_new(sizeof(Item), INIT_ITEMS_CAPACITY, cleanup_item);
+    add_gear(&results.items, entity_results.gear);
+    add_drifs(&results.items, entity_results.drifs);
+    add_items(&results.items, entity_results.items);
 
     if (strlen(entity_results.saturation) > 0) {
         int saturation_id;
@@ -216,13 +222,8 @@ ParsedData parse_fight_results(byte_t *data, size_t length) {
 
     FightResults *results = safe_malloc(sizeof(FightResults));
 
-    results->friendly_results = safe_malloc(INIT_ENTITIES_PER_SIDE * sizeof(FriendlyResults));
-    results->num_friendly = 0;
-    size_t friendly_cap = INIT_ENTITIES_PER_SIDE;
-
-    results->enemy_results = safe_malloc(INIT_ENTITIES_PER_SIDE * sizeof(EnemyResults));
-    results->num_enemy = 0;
-    size_t enemy_cap = INIT_ENTITIES_PER_SIDE;
+    results->friendly_results = array_new(sizeof(FriendlyResults), INIT_ENTITIES_PER_SIDE, cleanup_friendly_results);
+    results->enemy_results = array_new(sizeof(EnemyResults), INIT_ENTITIES_PER_SIDE, cleanup_enemy_results);
 
     byte_t *entity_separator;
     do {
@@ -236,12 +237,12 @@ ParsedData parse_fight_results(byte_t *data, size_t length) {
         switch (entity_results.team) {
             case TEAM_FRIEND: {
                 FriendlyResults res = parse_to_friendly(entity_results);
-                results->friendly_results = array_append(results->friendly_results, sizeof(FriendlyResults), &results->num_friendly, &friendly_cap, &res);
+                array_append(&results->friendly_results, &res);
                 break;
             }
             case TEAM_ENEMY: {
                 EnemyResults res = parse_to_enemy(entity_results);
-                results->enemy_results = array_append(results->enemy_results, sizeof(EnemyResults), &results->num_enemy, &enemy_cap, &res);
+                array_append(&results->enemy_results, &res);
                 break;
             }
         }

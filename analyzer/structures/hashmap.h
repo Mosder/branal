@@ -7,24 +7,24 @@
 
 typedef struct HashMapNode {
     void *key;
-    void *value;
+    void *val;
     struct HashMapNode *next;
 } HashMapNode;
 
 typedef struct {
     HashMapNode *table[HASHMAP_TABLE_SIZE];
     size_t key_size;
-    size_t value_size;
+    size_t val_size;
     size_t (*hash)(void *key);
     int (*compare)(void *key1, void *key2);
     void (*key_cleanup)(void *key);
-    void (*value_cleanup)(void *value);
+    void (*val_cleanup)(void *val);
 } HashMap;
 
 // create a new hash map
 // params:
 //      - key_size - size of the key type
-//      - value_size - size of the value type
+//      - val_size - size of the value type
 //      - hash - function for hashing keys
 //        params:
 //             - key - pointer to the key to hash
@@ -40,27 +40,27 @@ typedef struct {
 //                      if it has no heap allocations, this should be NULL
 //        params:
 //             - key - pointer to the key to cleanup
-//      - value_cleanup - function for cleaning up any internal allocations inside node->value (not the value itself)
-//                        if it has no heap allocations, this should be NULL
+//      - val_cleanup - function for cleaning up any internal allocations inside node->val (not the value itself)
+//                      if it has no heap allocations, this should be NULL
 //        params:
-//             - value - pointer to the value to cleanup
+//             - val - pointer to the value to cleanup
 // returns:
 //      pointer to the new hash map
 extern HashMap *hashmap_new(
     size_t key_size,
-    size_t value_size,
+    size_t val_size,
     size_t (*hash)(void *key),
     int (*compare)(void *key1, void *key2),
     void (*key_cleanup)(void *key),
-    void (*value_cleanup)(void *value)
+    void (*val_cleanup)(void *val)
 );
 
 // create/update an entry in a hash map
 // params:
 //      - map - hash map to insert to
 //      - key - pointer to the key
-//      - value - pointer to the value
-extern void hashmap_put(HashMap *map, void *key, void *value);
+//      - val - pointer to the value
+extern void hashmap_put(HashMap *map, void *key, void *val);
 
 // get the value of given key from a hash map
 // params:

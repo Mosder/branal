@@ -4,6 +4,7 @@
 #include <pcap.h>
 
 #include "structures/heap.h"
+#include "structures/array.h"
 
 #ifndef TCP_H
 #define TCP_H
@@ -32,9 +33,7 @@ extern TCPSegment get_segment_from_packet(const byte_t *packet, const struct pca
 
 // struct that stores all the information about stream
 typedef struct {
-    byte_t *data;         // bytes in the stream
-    size_t len;           // length of the stream
-    size_t capacity;      // capacity of the data buffer
+    DynArray bytes;       // bytes in the stream
     uint32_t seq;         // TCP sequence number of the first byte in the stream
     uint16_t port;        // client port of currently analyzed connection
     ConnectionSource src; // stream's source

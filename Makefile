@@ -29,6 +29,7 @@ main_files:
 structures:
 	$(CC) $(CFLAGS) -c analyzer/structures/hashmap.c
 	$(CC) $(CFLAGS) -c analyzer/structures/heap.c
+	$(CC) $(CFLAGS) -c analyzer/structures/array.c
 
 utils:
 	$(CC) $(CFLAGS) -c analyzer/utils/fs.c

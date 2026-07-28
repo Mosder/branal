@@ -39,14 +39,14 @@ void print_center(char *text, int color, size_t width, char padding_char) {
         printf("%c", padding_char);
 }
 
-void print_enemy_list(EnemyResults *results, size_t n_enemies) {
+void print_enemy_list(DynArray enemies) {
     printf(TABLE_LINE_START);
     size_t line_length = TABLE_LINE_START_WIDTH;
 
-    for (size_t i = 0; i < n_enemies; i++) {
-        EnemyResults enemy = results[i];
+    EnemyResults *enemy = NULL;
+    while ((enemy = array_next(enemies, enemy))) {
         char enemy_buffer[TABLE_LINE_WIDTH + 1];
-        sprintf(enemy_buffer, "%s (%d)%s", enemy.name, enemy.level, i < n_enemies - 1 ? ", " : "");
+        sprintf(enemy_buffer, "%s (%d)%s", enemy->name, enemy->level, array_next(enemies, enemy) ? ", " : "");
 
         // break line if length would be too big
         if (line_length + utf8_strlen(enemy_buffer) > TABLE_LINE_WIDTH - TABLE_LINE_END_WIDTH) {
@@ -122,20 +122,21 @@ void print_player_rewards(FriendlyResults results) {
     }
     printf("\n");
 
-    if (results.num_items > 0) {
+    if (results.items.count > 0) {
         printf(TABLE_LINE_START);
         print_center("ITEMS", COLOR_WHITE, TABLE_ITEMS_WIDTH, ' ');
         printf(TABLE_LINE_END "\n" TABLE_LINE_START);
 
         size_t line_len = 0;
-        for (size_t i = 0; i < results.num_items; i++) {
-            char *sep = i < results.num_items - 1 ? ", " : "";
-            size_t item_len = utf8_strlen(results.items[i].data) + strlen(sep);
+        Item *item = NULL;
+        while ((item = array_next(results.items, item))) {
+            char *sep = array_next(results.items, item) ? ", " : "";
+            size_t item_len = utf8_strlen(item->data) + strlen(sep);
             if (line_len + item_len > TABLE_ITEMS_WIDTH) {
                 printf("%*s" TABLE_LINE_END "\n" TABLE_LINE_START, (int)(TABLE_ITEMS_WIDTH - line_len), "");
                 line_len = 0;
             }
-            print_color(results.items[i].data, item_type_to_color(results.items[i].type));
+            print_color(item->data, item_type_to_color(item->type));
             printf("%s", sep);
             line_len += item_len;
         }
@@ -147,7 +148,7 @@ void render_fight_results(FightResults results) {
     print_center("ENEMIES", COLOR_RED, TABLE_LINE_WIDTH, TABLE_ROW_SEPARATOR_CHAR);
     printf("\n");
 
-    print_enemy_list(results.enemy_results, results.num_enemy);
+    print_enemy_list(results.enemy_results);
 
     print_center("PLAYER REWARDS", COLOR_GREEN, TABLE_LINE_WIDTH, TABLE_ROW_SEPARATOR_CHAR);
     printf("\n");
@@ -155,8 +156,9 @@ void render_fight_results(FightResults results) {
     print_column_names();
     print_row_separator();
 
-    for (size_t i = 0; i < results.num_friendly; i++) {
-        print_player_rewards(results.friendly_results[i]);
+    FriendlyResults *friendly = NULL;
+    while ((friendly = array_next(results.friendly_results, friendly))) {
+        print_player_rewards(*friendly);
         print_row_separator();
     }
 }
