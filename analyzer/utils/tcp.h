@@ -10,13 +10,16 @@
 
 typedef unsigned char byte_t;
 
+typedef enum { SERVER, CLIENT } ConnectionSource;
+
 // struct to persistently store TCP segments
 // payload field is malloced and needs to be freed
 typedef struct {
-    byte_t *payload; // payload in the segment
-    size_t len;      // length of the payload
-    uint32_t seq;    // TCP sequence number of the segment
-    uint16_t port;   // destination (client) port of connection the segment was received from
+    byte_t *payload;      // payload in the segment
+    size_t len;           // length of the payload
+    uint32_t seq;         // TCP sequence number of the segment
+    uint16_t port;        // client port of connection the segment was received from
+    ConnectionSource src; // segment's source
 } TCPSegment;
 
 // get TCP segment from captured packet
@@ -29,20 +32,23 @@ extern TCPSegment get_segment_from_packet(const byte_t *packet, const struct pca
 
 // struct that stores all the information about stream
 typedef struct {
-    byte_t *data;    // bytes in the stream
-    size_t len;      // length of the stream
-    size_t capacity; // capacity of the data buffer
-    uint32_t seq;    // TCP sequence number of the first byte in the stream
-    uint16_t port;   // destination (client) port of current analyzed connection
-    Heap *pending;   // min heap of segments yet to be added to stream (sorted by TCP sequence number)
+    byte_t *data;         // bytes in the stream
+    size_t len;           // length of the stream
+    size_t capacity;      // capacity of the data buffer
+    uint32_t seq;         // TCP sequence number of the first byte in the stream
+    uint16_t port;        // client port of currently analyzed connection
+    ConnectionSource src; // stream's source
+    Heap *pending;        // min heap of segments yet to be added to stream (sorted by TCP sequence number)
 } TCPStream;
 
 #define INIT_STREAM_CAPACITY 256
 
 // initialize new stream
+// params:
+//      - src - source of the stream
 // returns:
 //      newly created TCPStream structure with initial values
-extern TCPStream new_stream();
+extern TCPStream new_stream(ConnectionSource src);
 
 // cleanup memory allocations within stream
 // params:

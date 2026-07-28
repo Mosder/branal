@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "headers/server.h"
 #include "utils/memory.h"
 #include "utils/tcp_seq_math.h"
 
@@ -50,6 +51,9 @@ TCPSegment get_segment_from_packet(const byte_t *packet, const struct pcap_pkthd
     const struct ip *ip_header = (const struct ip *)(packet + eth_header_len);
     int ip_header_len = ip_header->ip_hl * 4;
 
+    // get source
+    segment.src = ip_header->ip_src.s_addr == inet_addr(SERVER_IP) ? SERVER : CLIENT;
+
     // check if it's TCP
     if (ip_header->ip_p != IPPROTO_TCP)
         return segment;
@@ -58,9 +62,9 @@ TCPSegment get_segment_from_packet(const byte_t *packet, const struct pcap_pkthd
     const struct tcphdr *tcp_header = (const struct tcphdr *)(packet + eth_header_len + ip_header_len);
     int tcp_header_len = tcp_header->th_off * 4;
 
-    // get TCP sequence number and destination port
+    // get TCP sequence number and client port
     segment.seq = ntohl(tcp_header->seq);
-    segment.port = ntohs(tcp_header->th_dport);
+    segment.port = ntohs(segment.src == SERVER ? tcp_header->th_dport : tcp_header->th_sport);
 
     // get payload
     int total_header_len = eth_header_len + ip_header_len + tcp_header_len;
@@ -70,7 +74,7 @@ TCPSegment get_segment_from_packet(const byte_t *packet, const struct pcap_pkthd
     return segment;
 }
 
-TCPStream new_stream() {
+TCPStream new_stream(ConnectionSource src) {
     // clang-format off
     TCPStream stream = {
         .data = safe_malloc(INIT_STREAM_CAPACITY),
@@ -78,6 +82,7 @@ TCPStream new_stream() {
         .capacity = INIT_STREAM_CAPACITY,
         .seq = 0,
         .port = 0,
+        .src = src,
         .pending = NULL
     };
     // clang-format on

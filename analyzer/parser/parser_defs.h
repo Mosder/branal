@@ -37,6 +37,7 @@ typedef ParsedData parse_function_t(byte_t *data, size_t length);
 typedef struct {
     find_function_t *find_fn;
     parse_function_t *parse_fn;
+    ConnectionSource stream_src; // which stream to look for the data
 } FindParseFunctions;
 
 #endif

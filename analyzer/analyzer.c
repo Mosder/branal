@@ -7,9 +7,13 @@
 #include "render.h"
 #include "utils/tcp.h"
 
-// loop through packets received from pcap_handle and analyze the TCP stream
+// loop through packets received from pcap_handle and analyze the TCP streams
 void analyzer_loop(
-    TCPStream *stream, pcap_t *pcap_handle, void *state, void (*parsed_data_handler)(void *state, ParsedData *parsed_data, size_t n_parsed_data)
+    TCPStream *server_stream,
+    TCPStream *client_stream,
+    pcap_t *pcap_handle,
+    void *state,
+    void (*parsed_data_handler)(void *state, ParsedData *parsed_data, size_t n_parsed_data)
 ) {
     // read packets from handle
     struct pcap_pkthdr *packet_data;
@@ -19,7 +23,11 @@ void analyzer_loop(
         TCPSegment segment = get_segment_from_packet(packet, packet_data);
 
         // handle the new segment if it's correct one and has data in it (ignore SYN)
-        if (segment.len > 0 && handle_segment(stream, segment)) {
+        if (segment.len <= 0)
+            continue;
+
+        TCPStream *stream = segment.src == SERVER ? server_stream : client_stream;
+        if (handle_segment(stream, segment)) {
             // if it was added to the stream - parse it
             size_t parsed_len;
             size_t n_parsed_data;
@@ -64,9 +72,11 @@ void analyze_file(char *path) {
     }
 
     // analyze the file
-    TCPStream stream = new_stream();
+    TCPStream server_stream = new_stream(SERVER);
+    TCPStream client_stream = new_stream(CLIENT);
     int state = 0;
-    analyzer_loop(&stream, handle, &state, file_parsed_data_handler);
-    destroy_stream(stream);
+    analyzer_loop(&server_stream, &client_stream, handle, &state, file_parsed_data_handler);
+    destroy_stream(server_stream);
+    destroy_stream(client_stream);
     pcap_close(handle);
 }

@@ -9,6 +9,10 @@
 byte_t *find_earliest_data(TCPStream *stream, int stream_offset, int *earliest_length, parse_function_t **earliest_parse_fun) {
     byte_t *earliest_data = NULL;
     for (size_t i = 0; i < ARR_LEN(all_find_parse_functions); i++) {
+        // ignore if not correct stream
+        if (stream->src != all_find_parse_functions[i].stream_src)
+            continue;
+
         int length;
         byte_t *data = all_find_parse_functions[i].find_fn(stream, stream_offset, &length);
         // if it's the first found or earlier than earliest - save it

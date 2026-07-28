@@ -3,4 +3,4 @@
 
 #include "parser/fight_results/fight_results.h"
 
-FindParseFunctions all_find_parse_functions[] = {{find_fight_results, parse_fight_results}};
+FindParseFunctions all_find_parse_functions[] = {{find_fight_results, parse_fight_results, SERVER}};
