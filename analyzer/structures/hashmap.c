@@ -8,7 +8,7 @@
 HashMap *hashmap_new(
     size_t key_size,
     size_t val_size,
-    size_t (*hash)(void *key),
+    uint32_t (*hash)(void *key),
     int (*compare)(void *key1, void *key2),
     void (*key_cleanup)(void *key),
     void (*val_cleanup)(void *val)
@@ -26,7 +26,7 @@ HashMap *hashmap_new(
 }
 
 void hashmap_put(HashMap *map, void *key, void *val) {
-    size_t key_hash = map->hash(key);
+    size_t key_hash = map->hash(key) % HASHMAP_TABLE_SIZE;
     HashMapNode *node = map->table[key_hash];
 
     // check if it exists
@@ -56,7 +56,7 @@ void hashmap_put(HashMap *map, void *key, void *val) {
 }
 
 void *hashmap_get(HashMap *map, void *key) {
-    size_t key_hash = map->hash(key);
+    size_t key_hash = map->hash(key) % HASHMAP_TABLE_SIZE;
     HashMapNode *node = map->table[key_hash];
 
     // check if it exists
@@ -85,7 +85,7 @@ void free_node_without_next(HashMap *map, HashMapNode *node) {
 }
 
 void hashmap_delete(HashMap *map, void *key) {
-    size_t key_hash = map->hash(key);
+    size_t key_hash = map->hash(key) % HASHMAP_TABLE_SIZE;
     HashMapNode **p_node = &map->table[key_hash];
 
     // check if it exists
@@ -113,4 +113,22 @@ void hashmap_free(HashMap *map) {
         }
     }
     free(map);
+}
+
+// FNV hash
+uint32_t hash_str(void *str) {
+    char *s = str;
+    uint32_t hash = 2166136261;
+    while (*s) {
+        hash ^= (unsigned char)*s;
+        hash *= 16777619;
+        s++;
+    }
+    return hash;
+}
+
+int compare_strs(void *str1, void *str2) {
+    char *s1 = str1;
+    char *s2 = str2;
+    return !strcmp(s1, s2);
 }

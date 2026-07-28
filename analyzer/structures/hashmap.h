@@ -2,6 +2,10 @@
 // a simple implementation of hashmap using linked list
 
 #include <stddef.h>
+#include <stdint.h>
+
+#ifndef HASHMAP_H
+#define HASHMAP_H
 
 #define HASHMAP_TABLE_SIZE 128
 
@@ -15,7 +19,7 @@ typedef struct {
     HashMapNode *table[HASHMAP_TABLE_SIZE];
     size_t key_size;
     size_t val_size;
-    size_t (*hash)(void *key);
+    uint32_t (*hash)(void *key);
     int (*compare)(void *key1, void *key2);
     void (*key_cleanup)(void *key);
     void (*val_cleanup)(void *val);
@@ -29,7 +33,7 @@ typedef struct {
 //        params:
 //             - key - pointer to the key to hash
 //        returns:
-//             hash of the key (size_t in [0; HASHMAP_TABLE_SIZE))
+//             hash of the key
 //      - compare - function for comparing keys
 //        params:
 //             - key1 - pointer to the first of the keys to compare
@@ -49,7 +53,7 @@ typedef struct {
 extern HashMap *hashmap_new(
     size_t key_size,
     size_t val_size,
-    size_t (*hash)(void *key),
+    uint32_t (*hash)(void *key),
     int (*compare)(void *key1, void *key2),
     void (*key_cleanup)(void *key),
     void (*val_cleanup)(void *val)
@@ -79,3 +83,18 @@ extern void hashmap_delete(HashMap *map, void *key);
 // free the hash map
 //      - map - hash map to free
 extern void hashmap_free(HashMap *map);
+
+// hash a string
+//      - str - string to hash
+// returns:
+//      hash of the string
+extern uint32_t hash_str(void *str);
+
+// compare 2 strings
+//      - str1 - first string to compare
+//      - str2 - second string to compare
+// returns:
+//      1 if strings are identical, 0 otherwise
+extern int compare_strs(void *str1, void *str2);
+
+#endif

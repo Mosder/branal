@@ -87,8 +87,9 @@ int item_type_to_color(ItemType type) {
             return COLOR_AQUA;
         case EPIC:
             return COLOR_PURPLE;
+        default:
+            return COLOR_WHITE;
     }
-    return COLOR_WHITE;
 }
 
 void print_player_rewards(FriendlyResults results) {
@@ -161,4 +162,56 @@ void render_fight_results(FightResults results) {
         print_player_rewards(*friendly);
         print_row_separator();
     }
+}
+
+// TODO: improve this ugly shit
+void render_total_rewards(TotalRewards rewards) {
+    printf("\n");
+    print_center("TOTAL REWARDS", COLOR_GREEN, TABLE_LINE_WIDTH, TABLE_ROW_SEPARATOR_CHAR);
+    printf("\n");
+
+    print_column_names();
+    print_row_separator();
+
+    char buffers[ARR_LEN(columns)][TABLE_LINE_WIDTH];
+    sprintf(buffers[0], "---");
+    sprintf(buffers[1], "%d", rewards.exp);
+    sprintf(buffers[2], "%d", rewards.gold);
+    sprintf(buffers[3], "%d", rewards.psycho);
+    int *sat = hashmap_get(rewards.saturations, "Yantrei");
+    sprintf(buffers[4], "%d Yan", sat ? *sat : 0);
+    sprintf(buffers[5], "---");
+
+    printf(TABLE_LINE_START);
+    for (size_t i = 0; i < ARR_LEN(columns); i++) {
+        char to_color[columns[i].width + 1];
+        sprintf(to_color, "%*s", (int)columns[i].width, buffers[i]);
+        print_color(to_color, columns[i].color);
+        printf(i < ARR_LEN(columns) - 1 ? TABLE_LINE_SEPARATOR : TABLE_LINE_END);
+    }
+    printf("\n");
+
+    for (size_t i = 0; i < MAX_ITEM_TYPE; i++) {
+        if (rewards.items[i].count > 0) {
+            printf(TABLE_LINE_START);
+            print_center("ITEMS", COLOR_WHITE, TABLE_ITEMS_WIDTH, ' ');
+            printf(TABLE_LINE_END "\n" TABLE_LINE_START);
+
+            size_t line_len = 0;
+            char **item = NULL;
+            while ((item = array_next(rewards.items[i], item))) {
+                char *sep = array_next(rewards.items[i], item) ? ", " : "";
+                size_t item_len = utf8_strlen(*item) + strlen(sep);
+                if (line_len + item_len > TABLE_ITEMS_WIDTH) {
+                    printf("%*s" TABLE_LINE_END "\n" TABLE_LINE_START, (int)(TABLE_ITEMS_WIDTH - line_len), "");
+                    line_len = 0;
+                }
+                print_color(*item, item_type_to_color(i));
+                printf("%s", sep);
+                line_len += item_len;
+            }
+            printf("%*s" TABLE_LINE_END "\n", (int)(TABLE_ITEMS_WIDTH - line_len), "");
+        }
+    }
+    print_row_separator();
 }

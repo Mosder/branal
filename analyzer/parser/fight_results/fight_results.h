@@ -18,7 +18,7 @@
 #define SEPARATOR_ITEMS "[-]"
 
 // Item struct - for keeping item string and type
-typedef enum { NORMAL, DRIF, ORB, SYNG, SET, RARE, EPIC } ItemType;
+typedef enum { NORMAL, DRIF, ORB, SYNG, SET, RARE, EPIC, MAX_ITEM_TYPE } ItemType;
 typedef struct {
     char *data;
     ItemType type;

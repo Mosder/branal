@@ -189,6 +189,7 @@ FriendlyResults parse_to_friendly(EntityResults entity_results) {
         .level = entity_results.level,
         .psycho = entity_results.psycho,
         .splinters = entity_results.splinters,
+        .saturation_type = NULL,
         .saturation = 0
     };
 

@@ -3,6 +3,7 @@
 
 #include "parser/fight_results/fight_results.h"
 #include "utils/memory.h"
+#include "analyzer.h"
 
 // ANSI escape sequence colors
 #define COLOR_GOLD 33
@@ -53,3 +54,8 @@ inline static size_t sum_col_widths() {
 // params:
 //      - results - fight results to render
 extern void render_fight_results(FightResults results);
+
+// render total rewards onto the terminal
+// params:
+//      - rewards - total rewards to render
+extern void render_total_rewards(TotalRewards rewards);
