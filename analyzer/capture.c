@@ -21,7 +21,7 @@ void capturing_mode(char *path) {
         return;
     }
 
-    char capture_dir[PATH_MAX], new_path[PATH_MAX], date_time[128];
+    char capture_dir[PATH_MAX], new_path[PATH_MAX + 256], date_time[128];
     get_capture_dir(capture_dir);
     get_date_time_string(date_time);
     sprintf(new_path, "%s/capture-%s.pcap", capture_dir, date_time);

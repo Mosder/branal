@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -Wextra -iquote ./analyzer -O2 -flto -s
+CFLAGS=-std=c99 -D_DEFAULT_SOURCE -Wall -Wextra -iquote ./analyzer -O2 -flto -s
 
 global: compile
 	sudo mv branal /usr/local/bin
@@ -7,7 +7,7 @@ global: compile
 local: compile
 	mv branal ${HOME}/.local/bin
 
-debug: CFLAGS=-iquote ./analyzer -Og -g
+debug: CFLAGS=-std=c99 -D_DEFAULT_SOURCE -Wall -Wextra -iquote ./analyzer -Og -g
 debug: global
 
 compile: csv_table_gen main_files structures utils parser
