@@ -6,16 +6,13 @@
 #include "utils/memory.h"
 
 DynArray array_new(size_t el_size, size_t capacity, void (*el_cleanup)(void *el)) {
-    // clang-format off
-    DynArray array = {
+    return (DynArray){
         .data = safe_malloc(capacity * el_size),
         .el_size = el_size,
         .count = 0,
         .capacity = capacity,
-        .el_cleanup = el_cleanup
+        .el_cleanup = el_cleanup,
     };
-    // clang-format on
-    return array;
 }
 
 void *array_get(DynArray array, size_t index) {

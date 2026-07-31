@@ -25,14 +25,12 @@ void cleanup_str_pointer(void *str_pointer) {
 // initalize new total rewards
 TotalRewards new_total_rewards() {
     HashMap *saturations = hashmap_new(sizeof(const char *), sizeof(int), hash_str, compare_strs, NULL, NULL);
-    // clang-format off
     TotalRewards rewards = {
         .exp = 0,
         .gold = 0,
         .psycho = 0,
-        .saturations = saturations
+        .saturations = saturations,
     };
-    // clang-format on
     for (size_t i = 0; i < MAX_ITEM_TYPE; i++)
         rewards.items[i] = array_new(sizeof(char **), 16, cleanup_str_pointer);
     return rewards;

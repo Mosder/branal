@@ -12,15 +12,12 @@
 
 // initalize default TCP segment
 TCPSegment new_segment() {
-    // clang-format off
-    TCPSegment segment = {
+    return (TCPSegment){
         .payload = NULL,
         .len = 0,
         .seq = 0,
-        .port = 0
+        .port = 0,
     };
-    // clang-format on
-    return segment;
 }
 
 // segments compare function to use with heap
@@ -75,16 +72,13 @@ TCPSegment get_segment_from_packet(const byte_t *packet, const struct pcap_pkthd
 }
 
 TCPStream new_stream(ConnectionSource src) {
-    // clang-format off
-    TCPStream stream = {
+    return (TCPStream){
         .bytes = array_new(1, INIT_STREAM_CAPACITY, NULL),
         .seq = 0,
         .port = 0,
         .src = src,
-        .pending = NULL
+        .pending = NULL,
     };
-    // clang-format on
-    return stream;
 }
 
 void destroy_stream(TCPStream stream) {
